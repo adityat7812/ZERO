@@ -1,2118 +1,1746 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>NEET 2027 · 和 Countdown</title>
-
-    <!-- Google Fonts: Noto Sans JP + Inter for clean aesthetic -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Noto+Sans+JP:wght@100..900&display=swap" rel="stylesheet" />
-
-    <style>
-        /* ============================================================
-                   1.  CSS RESET & BASE
-                   ============================================================ */
-        *,
-        *::before,
-        *::after {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            /* ——— Colours ——— */
-            --color-ink: #1a1a2e;
-            --color-ink-light: #2d2d44;
-            --color-paper: #f7f2eb;
-            --color-paper-warm: #f0ebe3;
-            --color-gold: #c9a84c;
-            --color-gold-soft: #e8d5a3;
-            --color-vermilion: #b33939;
-            --color-vermilion-soft: #d4a0a0;
-            --color-sage: #5a7a6a;
-            --color-sage-soft: #b5c9be;
-            --color-indigo: #2c3e6b;
-            --color-indigo-soft: #6b7fa0;
-            --color-shadow: rgba(26, 26, 46, 0.08);
-            --color-shadow-deep: rgba(26, 26, 46, 0.16);
-
-            /* ——— Typography ——— */
-            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            --font-jp: 'Noto Sans JP', 'Inter', sans-serif;
-
-            /* ——— Spacing ——— */
-            --space-xs: 0.4rem;
-            --space-sm: 0.8rem;
-            --space-md: 1.6rem;
-            --space-lg: 3.2rem;
-            --space-xl: 6.4rem;
-
-            /* ——— Border ——— */
-            --border-subtle: 1px solid rgba(26, 26, 46, 0.08);
-            --border-gold: 1px solid rgba(201, 168, 76, 0.3);
-
-            /* ——— Radius ——— */
-            --radius-sm: 4px;
-            --radius-md: 8px;
-            --radius-lg: 16px;
-
-            /* ——— Transitions ——— */
-            --ease-out: cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            --ease-in-out: cubic-bezier(0.645, 0.045, 0.355, 1);
-            --duration-smooth: 0.6s;
-        }
-
-        html {
-            font-size: 62.5%;
-            scroll-behavior: smooth;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-
-        body {
-            font-family: var(--font-sans);
-            font-size: 1.6rem;
-            line-height: 1.7;
-            color: var(--color-ink);
-            background: var(--color-paper);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background-image:
-                radial-gradient(ellipse at 20% 50%, rgba(201, 168, 76, 0.04) 0%, transparent 60%),
-                radial-gradient(ellipse at 80% 20%, rgba(44, 62, 107, 0.03) 0%, transparent 50%),
-                url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%231a1a2e' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-        }
-
-        /* ============================================================
-                   2.  SCROLLBAR STYLING
-                   ============================================================ */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: var(--color-paper-warm);
-        }
-        ::-webkit-scrollbar-thumb {
-            background: var(--color-gold);
-            border-radius: 12px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--color-gold-soft);
-        }
-
-        /* ============================================================
-                   3.  UTILITY CLASSES
-                   ============================================================ */
-        .container {
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 var(--space-md);
-        }
-
-        .text-gold {
-            color: var(--color-gold);
-        }
-        .text-vermilion {
-            color: var(--color-vermilion);
-        }
-        .text-sage {
-            color: var(--color-sage);
-        }
-        .text-indigo {
-            color: var(--color-indigo);
-        }
-        .text-center {
-            text-align: center;
-        }
-        .flex {
-            display: flex;
-        }
-        .flex-center {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .flex-col {
-            flex-direction: column;
-        }
-        .gap-sm {
-            gap: var(--space-sm);
-        }
-        .gap-md {
-            gap: var(--space-md);
-        }
-        .gap-lg {
-            gap: var(--space-lg);
-        }
-        .mt-sm {
-            margin-top: var(--space-sm);
-        }
-        .mt-md {
-            margin-top: var(--space-md);
-        }
-        .mt-lg {
-            margin-top: var(--space-lg);
-        }
-        .mb-sm {
-            margin-bottom: var(--space-sm);
-        }
-        .mb-md {
-            margin-bottom: var(--space-md);
-        }
-        .mb-lg {
-            margin-bottom: var(--space-lg);
-        }
-        .relative {
-            position: relative;
-        }
-        .hidden {
-            display: none !important;
-        }
-
-        /* ============================================================
-                   4.  TYPOGRAPHY
-                   ============================================================ */
-        h1,
-        h2,
-        h3,
-        h4,
-        h5,
-        h6 {
-            font-family: var(--font-jp);
-            font-weight: 500;
-            letter-spacing: 0.02em;
-            line-height: 1.3;
-        }
-
-        h1 {
-            font-size: 4.8rem;
-            font-weight: 400;
-        }
-        h2 {
-            font-size: 3.2rem;
-            font-weight: 400;
-            letter-spacing: 0.06em;
-        }
-        h3 {
-            font-size: 2.2rem;
-            font-weight: 400;
-        }
-        h4 {
-            font-size: 1.8rem;
-            font-weight: 500;
-        }
-
-        .subtitle {
-            font-size: 1.4rem;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            color: var(--color-indigo-soft);
-            font-weight: 400;
-        }
-
-        .kana {
-            font-family: var(--font-jp);
-            font-weight: 300;
-            font-size: 0.9em;
-            opacity: 0.7;
-        }
-
-        /* ============================================================
-                   5.  HEADER / NAVIGATION
-                   ============================================================ */
-        .site-header {
-            width: 100%;
-            padding: var(--space-md) 0;
-            background: rgba(247, 242, 235, 0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: var(--border-subtle);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            transition: background var(--duration-smooth) var(--ease-out);
-        }
-
-        .site-header.scrolled {
-            background: rgba(247, 242, 235, 0.96);
-            box-shadow: 0 2px 20px var(--color-shadow);
-        }
-
-        .header-inner {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: var(--space-sm);
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: var(--space-sm);
-            text-decoration: none;
-            color: var(--color-ink);
-            font-family: var(--font-jp);
-            font-weight: 400;
-            font-size: 2.2rem;
-            letter-spacing: 0.06em;
-        }
-
-        .logo-icon {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: var(--color-gold);
-            color: var(--color-paper);
-            font-size: 1.8rem;
-            font-weight: 300;
-            transition: transform 0.3s var(--ease-out);
-        }
-        .logo:hover .logo-icon {
-            transform: rotate(-8deg) scale(1.05);
-        }
-
-        .nav-links {
-            display: flex;
-            align-items: center;
-            gap: var(--space-sm);
-            list-style: none;
-            flex-wrap: wrap;
-        }
-
-        .nav-links a {
-            display: inline-block;
-            padding: 0.6rem 1.6rem;
-            font-size: 1.4rem;
-            font-weight: 400;
-            color: var(--color-ink-light);
-            text-decoration: none;
-            border-radius: 40px;
-            transition: all 0.25s var(--ease-out);
-            letter-spacing: 0.04em;
-            position: relative;
-        }
-
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            bottom: 2px;
-            left: 50%;
-            width: 0;
-            height: 1.5px;
-            background: var(--color-gold);
-            transition: all 0.3s var(--ease-out);
-            transform: translateX(-50%);
-        }
-
-        .nav-links a:hover::after {
-            width: 60%;
-        }
-        .nav-links a:hover {
-            color: var(--color-ink);
-        }
-        .nav-links a.active {
-            color: var(--color-ink);
-            background: rgba(201, 168, 76, 0.12);
-        }
-        .nav-links a.active::after {
-            width: 60%;
-        }
-
-        /* ============================================================
-                   6.  PAGE TRANSITIONS
-                   ============================================================ */
-        .page {
-            display: none;
-            animation: pageFadeIn 0.5s var(--ease-out) forwards;
-            padding: var(--space-lg) 0;
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding-left: var(--space-md);
-            padding-right: var(--space-md);
-        }
-
-        .page.active {
-            display: block;
-        }
-
-        @keyframes pageFadeIn {
-            0% {
-                opacity: 0;
-                transform: translateY(12px);
-            }
-            100% {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .page-exit {
-            animation: pageFadeOut 0.3s var(--ease-in-out) forwards;
-        }
-
-        @keyframes pageFadeOut {
-            0% {
-                opacity: 1;
-                transform: translateY(0);
-            }
-            100% {
-                opacity: 0;
-                transform: translateY(-8px);
-            }
-        }
-
-        /* ============================================================
-                   7.  CARDS & SURFACES
-                   ============================================================ */
-        .card {
-            background: rgba(255, 252, 248, 0.7);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
-            border-radius: var(--radius-lg);
-            border: var(--border-subtle);
-            padding: var(--space-lg);
-            box-shadow: 0 4px 24px var(--color-shadow);
-            transition: box-shadow 0.3s var(--ease-out), transform 0.3s var(--ease-out);
-        }
-
-        .card:hover {
-            box-shadow: 0 8px 40px var(--color-shadow-deep);
-            transform: translateY(-2px);
-        }
-
-        .card-gold {
-            border-color: var(--border-gold);
-            background: rgba(255, 252, 245, 0.8);
-        }
-
-        .card-glass {
-            background: rgba(255, 252, 248, 0.4);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        /* ============================================================
-                   8.  COUNTDOWN — MAIN HERO
-                   ============================================================ */
-        .hero-section {
-            padding: var(--space-xl) 0 var(--space-lg);
-            text-align: center;
-            position: relative;
-        }
-
-        .hero-section::before {
-            content: '⟡';
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 2.4rem;
-            color: var(--color-gold);
-            opacity: 0.3;
-            letter-spacing: 1.2rem;
-        }
-
-        .phase-badge {
-            display: inline-block;
-            padding: 0.4rem 2.4rem;
-            border-radius: 40px;
-            font-size: 1.4rem;
-            font-weight: 400;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            background: var(--color-gold-soft);
-            color: var(--color-ink);
-            border: var(--border-gold);
-            margin-bottom: var(--space-md);
-            font-family: var(--font-jp);
-        }
-
-        .phase-badge.revision {
-            background: var(--color-vermilion-soft);
-            border-color: rgba(179, 57, 57, 0.2);
-            color: var(--color-vermilion);
-        }
-
-        .countdown-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: var(--space-md);
-            max-width: 800px;
-            margin: var(--space-lg) auto;
-        }
-
-        .countdown-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: var(--space-md);
-            background: rgba(255, 252, 248, 0.5);
-            border-radius: var(--radius-md);
-            border: var(--border-subtle);
-            backdrop-filter: blur(2px);
-            transition: all 0.3s var(--ease-out);
-        }
-
-        .countdown-item:hover {
-            background: rgba(255, 252, 248, 0.8);
-            transform: scale(1.02);
-        }
-
-        .countdown-number {
-            font-size: 6.4rem;
-            font-weight: 300;
-            font-family: var(--font-jp);
-            line-height: 1;
-            color: var(--color-ink);
-            letter-spacing: 0.04em;
-            font-feature-settings: "tnum";
-        }
-
-        .countdown-label {
-            font-size: 1.2rem;
-            letter-spacing: 0.16em;
-            text-transform: uppercase;
-            color: var(--color-indigo-soft);
-            margin-top: var(--space-xs);
-            font-weight: 400;
-        }
-
-        .progress-wrapper {
-            max-width: 600px;
-            margin: var(--space-lg) auto 0;
-        }
-
-        .progress-track {
-            width: 100%;
-            height: 4px;
-            background: rgba(26, 26, 46, 0.08);
-            border-radius: 12px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .progress-fill {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, var(--color-gold), var(--color-gold-soft));
-            border-radius: 12px;
-            transition: width 0.8s var(--ease-out);
-        }
-
-        .progress-label {
-            display: flex;
-            justify-content: space-between;
-            font-size: 1.2rem;
-            color: var(--color-indigo-soft);
-            margin-top: var(--space-xs);
-            letter-spacing: 0.04em;
-        }
-
-        .sub-message {
-            margin-top: var(--space-md);
-            font-size: 1.6rem;
-            font-weight: 300;
-            color: var(--color-ink-light);
-            font-family: var(--font-jp);
-            letter-spacing: 0.04em;
-            opacity: 0.8;
-        }
-
-        .sub-message span {
-            color: var(--color-gold);
-            font-weight: 400;
-        }
-
-        /* ============================================================
-                   9.  STUDY TRACKER
-                   ============================================================ */
-        .tracker-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: var(--space-lg);
-            margin-top: var(--space-md);
-        }
-
-        @media (max-width: 700px) {
-            .tracker-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .subject-list {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: var(--space-sm);
-        }
-
-        .subject-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.8rem 1.2rem;
-            border-radius: var(--radius-sm);
-            background: rgba(255, 252, 248, 0.4);
-            border: var(--border-subtle);
-            transition: background 0.2s var(--ease-out);
-        }
-
-        .subject-item:hover {
-            background: rgba(255, 252, 248, 0.8);
-        }
-
-        .subject-item label {
-            display: flex;
-            align-items: center;
-            gap: var(--space-sm);
-            cursor: pointer;
-            font-size: 1.5rem;
-            flex: 1;
-        }
-
-        .subject-item input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            accent-color: var(--color-gold);
-            cursor: pointer;
-            border-radius: 4px;
-            border: 2px solid var(--color-gold-soft);
-            transition: all 0.2s;
-        }
-
-        .subject-item .subject-hours {
-            font-size: 1.3rem;
-            color: var(--color-indigo-soft);
-            font-weight: 400;
-        }
-
-        .study-stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: var(--space-sm);
-            margin-top: var(--space-md);
-        }
-
-        .stat-card {
-            text-align: center;
-            padding: var(--space-md);
-            background: rgba(255, 252, 248, 0.5);
-            border-radius: var(--radius-sm);
-            border: var(--border-subtle);
-        }
-
-        .stat-number {
-            font-size: 3.2rem;
-            font-weight: 300;
-            font-family: var(--font-jp);
-            color: var(--color-ink);
-        }
-
-        .stat-label {
-            font-size: 1.2rem;
-            letter-spacing: 0.08em;
-            color: var(--color-indigo-soft);
-            margin-top: 0.2rem;
-        }
-
-        /* ============================================================
-                   10. RESOURCES
-                   ============================================================ */
-        .resources-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-            gap: var(--space-md);
-            margin-top: var(--space-md);
-        }
-
-        .resource-card {
-            padding: var(--space-md);
-            border-radius: var(--radius-md);
-            background: rgba(255, 252, 248, 0.5);
-            border: var(--border-subtle);
-            transition: all 0.3s var(--ease-out);
-            text-decoration: none;
-            color: var(--color-ink);
-        }
-
-        .resource-card:hover {
-            background: rgba(255, 252, 248, 0.85);
-            transform: translateY(-4px);
-            box-shadow: 0 8px 30px var(--color-shadow);
-        }
-
-        .resource-card .title {
-            font-weight: 500;
-            font-size: 1.6rem;
-            font-family: var(--font-jp);
-        }
-
-        .resource-card .desc {
-            font-size: 1.3rem;
-            color: var(--color-indigo-soft);
-            margin-top: 0.4rem;
-        }
-
-        .resource-card .tag {
-            display: inline-block;
-            margin-top: var(--space-sm);
-            font-size: 1.1rem;
-            padding: 0.2rem 1.2rem;
-            border-radius: 40px;
-            background: var(--color-gold-soft);
-            color: var(--color-ink);
-            letter-spacing: 0.04em;
-        }
-
-        /* ============================================================
-                   11. NOTES
-                   ============================================================ */
-        .notes-area {
-            margin-top: var(--space-md);
-        }
-
-        .notes-input-group {
-            display: flex;
-            gap: var(--space-sm);
-            flex-wrap: wrap;
-            margin-bottom: var(--space-md);
-        }
-
-        .notes-input-group input {
-            flex: 1;
-            min-width: 200px;
-            padding: 0.8rem 1.6rem;
-            border: var(--border-subtle);
-            border-radius: var(--radius-sm);
-            font-size: 1.5rem;
-            background: rgba(255, 252, 248, 0.6);
-            font-family: var(--font-sans);
-            transition: border 0.2s, box-shadow 0.2s;
-            outline: none;
-            color: var(--color-ink);
-        }
-
-        .notes-input-group input:focus {
-            border-color: var(--color-gold);
-            box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.15);
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.6rem;
-            padding: 0.8rem 2.4rem;
-            border: none;
-            border-radius: var(--radius-sm);
-            font-size: 1.4rem;
-            font-weight: 400;
-            font-family: var(--font-sans);
-            background: var(--color-ink);
-            color: var(--color-paper);
-            cursor: pointer;
-            transition: all 0.25s var(--ease-out);
-            letter-spacing: 0.04em;
-            text-decoration: none;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 16px var(--color-shadow-deep);
-        }
-
-        .btn-gold {
-            background: var(--color-gold);
-            color: var(--color-ink);
-        }
-        .btn-gold:hover {
-            background: #dbb95c;
-        }
-
-        .btn-vermilion {
-            background: var(--color-vermilion);
-            color: white;
-        }
-        .btn-vermilion:hover {
-            background: #c94a4a;
-        }
-
-        .btn-outline {
-            background: transparent;
-            color: var(--color-ink);
-            border: var(--border-subtle);
-        }
-        .btn-outline:hover {
-            background: rgba(26, 26, 46, 0.04);
-            box-shadow: none;
-            transform: none;
-        }
-
-        .btn-sm {
-            padding: 0.4rem 1.2rem;
-            font-size: 1.2rem;
-        }
-
-        .notes-list {
-            display: flex;
-            flex-direction: column;
-            gap: var(--space-sm);
-        }
-
-        .note-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.8rem 1.6rem;
-            background: rgba(255, 252, 248, 0.5);
-            border-radius: var(--radius-sm);
-            border: var(--border-subtle);
-            transition: background 0.2s;
-            gap: var(--space-sm);
-        }
-
-        .note-item:hover {
-            background: rgba(255, 252, 248, 0.85);
-        }
-
-        .note-item .note-text {
-            flex: 1;
-            font-size: 1.5rem;
-        }
-
-        .note-item .note-time {
-            font-size: 1.2rem;
-            color: var(--color-indigo-soft);
-            white-space: nowrap;
-        }
-
-        .note-item .btn {
-            flex-shrink: 0;
-        }
-
-        /* ============================================================
-                   12. MOTIVATION
-                   ============================================================ */
-        .quote-box {
-            padding: var(--space-lg);
-            border-radius: var(--radius-lg);
-            background: rgba(255, 252, 248, 0.5);
-            border: var(--border-gold);
-            text-align: center;
-            max-width: 700px;
-            margin: 0 auto;
-            position: relative;
-        }
-
-        .quote-box::before {
-            content: '「';
-            font-size: 6rem;
-            color: var(--color-gold);
-            opacity: 0.15;
-            position: absolute;
-            top: -0.4rem;
-            left: 1.6rem;
-            font-family: var(--font-jp);
-        }
-
-        .quote-box::after {
-            content: '」';
-            font-size: 6rem;
-            color: var(--color-gold);
-            opacity: 0.15;
-            position: absolute;
-            bottom: -2.4rem;
-            right: 1.6rem;
-            font-family: var(--font-jp);
-        }
-
-        .quote-text {
-            font-size: 2.2rem;
-            font-weight: 300;
-            font-family: var(--font-jp);
-            line-height: 1.6;
-            color: var(--color-ink);
-            letter-spacing: 0.04em;
-        }
-
-        .quote-author {
-            margin-top: var(--space-md);
-            font-size: 1.4rem;
-            color: var(--color-indigo-soft);
-            letter-spacing: 0.08em;
-        }
-
-        .tips-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: var(--space-md);
-            margin-top: var(--space-lg);
-        }
-
-        .tip-card {
-            padding: var(--space-md);
-            border-radius: var(--radius-md);
-            background: rgba(255, 252, 248, 0.4);
-            border: var(--border-subtle);
-            text-align: center;
-            transition: all 0.3s var(--ease-out);
-        }
-
-        .tip-card:hover {
-            background: rgba(255, 252, 248, 0.75);
-            transform: translateY(-3px);
-        }
-
-        .tip-card .emoji {
-            font-size: 3.2rem;
-            display: block;
-            margin-bottom: var(--space-xs);
-        }
-
-        .tip-card .tip-title {
-            font-weight: 500;
-            font-size: 1.5rem;
-            font-family: var(--font-jp);
-        }
-
-        .tip-card .tip-desc {
-            font-size: 1.3rem;
-            color: var(--color-indigo-soft);
-            margin-top: 0.2rem;
-        }
-
-        /* ============================================================
-                   13. FOOTER
-                   ============================================================ */
-        .site-footer {
-            width: 100%;
-            padding: var(--space-lg) 0 var(--space-md);
-            border-top: var(--border-subtle);
-            margin-top: var(--space-xl);
-            text-align: center;
-            font-size: 1.3rem;
-            color: var(--color-indigo-soft);
-            letter-spacing: 0.04em;
-            background: rgba(247, 242, 235, 0.4);
-        }
-
-        .site-footer .footer-inner {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: var(--space-sm);
-        }
-
-        .site-footer .footer-divider {
-            width: 60px;
-            height: 1px;
-            background: var(--color-gold-soft);
-            margin: var(--space-xs) 0;
-        }
-
-        /* ============================================================
-                   14. RESPONSIVE
-                   ============================================================ */
-        @media (max-width: 820px) {
-            h1 {
-                font-size: 3.6rem;
-            }
-            h2 {
-                font-size: 2.6rem;
-            }
-            .countdown-number {
-                font-size: 4.8rem;
-            }
-            .countdown-grid {
-                gap: var(--space-sm);
-            }
-            .header-inner {
-                flex-direction: column;
-                align-items: stretch;
-                gap: var(--space-sm);
-            }
-            .nav-links {
-                justify-content: center;
-            }
-            .hero-section {
-                padding: var(--space-lg) 0 var(--space-md);
-            }
-            .quote-text {
-                font-size: 1.8rem;
-            }
-        }
-
-        @media (max-width: 500px) {
-            html {
-                font-size: 56%;
-            }
-            .countdown-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: var(--space-xs);
-            }
-            .countdown-number {
-                font-size: 3.6rem;
-            }
-            .study-stats {
-                grid-template-columns: 1fr 1fr;
-            }
-            .nav-links a {
-                padding: 0.4rem 1rem;
-                font-size: 1.2rem;
-            }
-            .card {
-                padding: var(--space-md);
-            }
-            .resources-grid {
-                grid-template-columns: 1fr;
-            }
-            .tips-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-            .notes-input-group {
-                flex-direction: column;
-            }
-        }
-
-        @media (max-width: 380px) {
-            .countdown-grid {
-                grid-template-columns: 1fr 1fr;
-                gap: 0.4rem;
-            }
-            .countdown-number {
-                font-size: 2.8rem;
-            }
-            .study-stats {
-                grid-template-columns: 1fr;
-            }
-            .tips-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* ============================================================
-                   15.  MISC —  Japanese decorative elements
-                   ============================================================ */
-        .deco-line {
-            width: 60px;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--color-gold), transparent);
-            margin: var(--space-md) auto;
-            opacity: 0.4;
-        }
-
-        .deco-dot {
-            display: inline-block;
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: var(--color-gold);
-            opacity: 0.25;
-            margin: 0 4px;
-        }
-
-        /* ============================================================
-                   16.  TOAST NOTIFICATION
-                   ============================================================ */
-        .toast {
-            position: fixed;
-            bottom: 2.4rem;
-            right: 2.4rem;
-            padding: 1.2rem 2.4rem;
-            border-radius: var(--radius-md);
-            background: var(--color-ink);
-            color: var(--color-paper);
-            font-size: 1.4rem;
-            box-shadow: 0 8px 32px var(--color-shadow-deep);
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.4s var(--ease-out);
-            z-index: 200;
-            pointer-events: none;
-            font-family: var(--font-sans);
-            max-width: 400px;
-        }
-
-        .toast.show {
-            opacity: 1;
-            transform: translateY(0);
-            pointer-events: auto;
-        }
-
-        /* ============================================================
-                   17.  COUNTDOWN ANIMATION (pulse on change)
-                   ============================================================ */
-        @keyframes countPulse {
-            0% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.04);
-            }
-            100% {
-                transform: scale(1);
-            }
-        }
-
-        .countdown-item.pulse .countdown-number {
-            animation: countPulse 0.3s var(--ease-out);
-        }
-
-        /* ============================================================
-                   18.  SCROLL REVEAL (simple)
-                   ============================================================ */
-        .reveal {
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.6s var(--ease-out);
-        }
-
-        .reveal.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* ============================================================
-                   19.  MOBILE MENU TOGGLE (simple)
-                   ============================================================ */
-        .menu-toggle {
-            display: none;
-            background: none;
-            border: none;
-            font-size: 2.4rem;
-            cursor: pointer;
-            color: var(--color-ink);
-            padding: 0.4rem;
-            border-radius: var(--radius-sm);
-            transition: background 0.2s;
-        }
-
-        .menu-toggle:hover {
-            background: rgba(26, 26, 46, 0.04);
-        }
-
-        @media (max-width: 640px) {
-            .menu-toggle {
-                display: block;
-                align-self: flex-end;
-            }
-            .nav-links {
-                display: none;
-                width: 100%;
-                flex-direction: column;
-                align-items: center;
-                padding: var(--space-sm) 0;
-                gap: 0.4rem;
-            }
-            .nav-links.open {
-                display: flex;
-            }
-            .nav-links a {
-                width: 100%;
-                text-align: center;
-                padding: 0.8rem;
-            }
-        }
-
-        /* ============================================================
-                   20.  UTILITY —  responsive grid for countdown small
-                   ============================================================ */
-        .countdown-item .sub-digit {
-            font-size: 0.7em;
-            opacity: 0.4;
-            font-weight: 300;
-        }
-
-        /* ============================================================
-                   21.  PRINT HIDE
-                   ============================================================ */
-        @media print {
-            .site-header,
-            .site-footer,
-            .btn,
-            .notes-input-group {
-                display: none !important;
-            }
-            .page {
-                padding: 0 !important;
-            }
-            .card {
-                box-shadow: none !important;
-                border: 1px solid #ddd !important;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NEET 2027 · 静 Countdown</title>
+  <!-- Fonts: Noto Serif JP (for elegance) + Inter (for clean sans) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&family=Noto+Serif+JP:wght@200;400;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ============================================================
+       0.  CSS VARIABLES – will be overridden by JS theme
+       ============================================================ */
+    :root {
+      --bg-primary: #f7f2eb;
+      --bg-card: rgba(255, 252, 248, 0.6);
+      --text-primary: #1a1a2e;
+      --text-secondary: #4a4a6a;
+      --accent: #c9a84c;
+      --accent-light: #e8d5a3;
+      --border-color: rgba(26, 26, 46, 0.08);
+      --shadow: rgba(26, 26, 46, 0.08);
+      --shadow-hover: rgba(26, 26, 46, 0.16);
+      --pattern-url: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%231a1a2e' fill-opacity='0.03'%3E%3Cpath d='M20 0v40M0 20h40'/%3E%3C/g%3E%3C/svg%3E");
+      --glass-bg: rgba(255, 252, 248, 0.4);
+      --badge-bg: #e8d5a3;
+      --badge-text: #1a1a2e;
+    }
+
+    /* ============================================================
+       1.  RESET & BASE
+       ============================================================ */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      font-size: 62.5%;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      font-size: 1.6rem;
+      line-height: 1.7;
+      color: var(--text-primary);
+      background: var(--bg-primary);
+      min-height: 100vh;
+      background-image: var(--pattern-url), radial-gradient(ellipse at 20% 50%, var(--accent) 0%, transparent 70%);
+      background-blend-mode: overlay, normal;
+      transition: background 0.8s ease, color 0.8s ease;
+      padding: 0 1.6rem;
+    }
+
+    /* ============================================================
+       2.  SCROLLBAR
+       ============================================================ */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.03);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--accent);
+      border-radius: 20px;
+    }
+
+    /* ============================================================
+       3.  UTILITY
+       ============================================================ */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .text-center {
+      text-align: center;
+    }
+    .flex {
+      display: flex;
+    }
+    .flex-col {
+      flex-direction: column;
+    }
+    .items-center {
+      align-items: center;
+    }
+    .justify-between {
+      justify-content: space-between;
+    }
+    .gap-sm {
+      gap: 0.8rem;
+    }
+    .gap-md {
+      gap: 1.6rem;
+    }
+    .gap-lg {
+      gap: 3.2rem;
+    }
+    .mt-md {
+      margin-top: 1.6rem;
+    }
+    .mt-lg {
+      margin-top: 3.2rem;
+    }
+    .mb-md {
+      margin-bottom: 1.6rem;
+    }
+    .mb-lg {
+      margin-bottom: 3.2rem;
+    }
+    .hidden {
+      display: none !important;
+    }
+    .relative {
+      position: relative;
+    }
+
+    /* ============================================================
+       4.  TYPOGRAPHY
+       ============================================================ */
+    h1, h2, h3, h4 {
+      font-family: 'Noto Serif JP', 'Inter', serif;
+      font-weight: 400;
+      letter-spacing: 0.04em;
+    }
+    h1 {
+      font-size: 4.8rem;
+      font-weight: 200;
+    }
+    h2 {
+      font-size: 3.2rem;
+      font-weight: 300;
+    }
+    h3 {
+      font-size: 2rem;
+      font-weight: 400;
+    }
+    .subtitle {
+      font-size: 1.4rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      font-weight: 400;
+    }
+
+    /* ============================================================
+       5.  CARDS
+       ============================================================ */
+    .card {
+      background: var(--bg-card);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      border-radius: 16px;
+      border: 1px solid var(--border-color);
+      padding: 2.4rem;
+      box-shadow: 0 4px 20px var(--shadow);
+      transition: box-shadow 0.3s ease, transform 0.3s ease, background 0.6s ease;
+    }
+    .card:hover {
+      box-shadow: 0 8px 40px var(--shadow-hover);
+      transform: translateY(-2px);
+    }
+
+    /* ============================================================
+       6.  HEADER / NAV
+       ============================================================ */
+    .site-header {
+      padding: 1.6rem 0;
+      border-bottom: 1px solid var(--border-color);
+      background: var(--bg-primary);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      transition: background 0.6s ease;
+    }
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1.2rem;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      text-decoration: none;
+      color: var(--text-primary);
+      font-family: 'Noto Serif JP', serif;
+      font-size: 2.4rem;
+      font-weight: 200;
+      letter-spacing: 0.08em;
+    }
+    .logo-icon {
+      display: inline-block;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      text-align: center;
+      line-height: 44px;
+      font-size: 2rem;
+      transition: transform 0.3s ease;
+    }
+    .logo:hover .logo-icon {
+      transform: rotate(-6deg) scale(1.05);
+    }
+    .nav-links {
+      display: flex;
+      list-style: none;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+    .nav-links a {
+      display: inline-block;
+      padding: 0.6rem 1.6rem;
+      border-radius: 40px;
+      font-size: 1.4rem;
+      font-weight: 400;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: all 0.25s ease;
+      position: relative;
+    }
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: 2px;
+      left: 50%;
+      width: 0;
+      height: 1.5px;
+      background: var(--accent);
+      transition: width 0.3s ease, left 0.3s ease;
+    }
+    .nav-links a:hover::after,
+    .nav-links a.active::after {
+      width: 60%;
+      left: 20%;
+    }
+    .nav-links a:hover {
+      color: var(--text-primary);
+    }
+    .nav-links a.active {
+      color: var(--text-primary);
+      background: rgba(201, 168, 76, 0.10);
+    }
+
+    /* mobile menu */
+    .menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 2.8rem;
+      cursor: pointer;
+      color: var(--text-primary);
+    }
+    @media (max-width: 640px) {
+      .menu-toggle {
+        display: block;
+      }
+      .nav-links {
+        display: none;
+        width: 100%;
+        flex-direction: column;
+        align-items: center;
+        padding: 1.2rem 0;
+        gap: 0.4rem;
+      }
+      .nav-links.open {
+        display: flex;
+      }
+      .nav-links a {
+        width: 100%;
+        text-align: center;
+        padding: 0.8rem;
+      }
+      h1 {
+        font-size: 3.6rem;
+      }
+    }
+
+    /* ============================================================
+       7.  PAGE TRANSITIONS
+       ============================================================ */
+    .page {
+      display: none;
+      animation: fadeIn 0.5s ease forwards;
+      padding: 2.4rem 0;
+    }
+    .page.active {
+      display: block;
+    }
+    @keyframes fadeIn {
+      0% { opacity: 0; transform: translateY(12px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ============================================================
+       8.  COUNTDOWN
+       ============================================================ */
+    .hero-section {
+      text-align: center;
+      padding: 3.2rem 0 1.6rem;
+      position: relative;
+    }
+    .hero-section::before {
+      content: '⛩️';
+      position: absolute;
+      top: -1.6rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 3.2rem;
+      opacity: 0.25;
+    }
+    .phase-badge {
+      display: inline-block;
+      padding: 0.4rem 2.4rem;
+      border-radius: 40px;
+      font-size: 1.4rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: var(--badge-bg);
+      color: var(--badge-text);
+      border: 1px solid var(--accent-light);
+      margin-bottom: 1.2rem;
+      font-family: 'Noto Serif JP', serif;
+    }
+    .phase-badge.revision {
+      background: #d4a0a0;
+      border-color: #b33939;
+      color: #5a1a1a;
+    }
+    .countdown-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.6rem;
+      max-width: 700px;
+      margin: 2.4rem auto;
+    }
+    .countdown-item {
+      background: var(--bg-card);
+      backdrop-filter: blur(4px);
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      padding: 1.6rem 0.8rem;
+      transition: transform 0.3s ease;
+    }
+    .countdown-item:hover {
+      transform: scale(1.03);
+    }
+    .countdown-number {
+      font-size: 6.4rem;
+      font-weight: 200;
+      font-family: 'Noto Serif JP', serif;
+      line-height: 1;
+      letter-spacing: 0.04em;
+    }
+    .countdown-label {
+      font-size: 1.2rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      margin-top: 0.4rem;
+    }
+    .progress-wrapper {
+      max-width: 600px;
+      margin: 2.4rem auto 0;
+    }
+    .progress-track {
+      width: 100%;
+      height: 4px;
+      background: rgba(0,0,0,0.06);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-light));
+      border-radius: 12px;
+      transition: width 0.8s ease;
+    }
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 1.2rem;
+      color: var(--text-secondary);
+      margin-top: 0.4rem;
+    }
+    .sub-message {
+      margin-top: 1.6rem;
+      font-size: 1.6rem;
+      font-weight: 300;
+      font-family: 'Noto Serif JP', serif;
+      letter-spacing: 0.04em;
+      opacity: 0.8;
+    }
+    .sub-message span {
+      color: var(--accent);
+      font-weight: 400;
+    }
+
+    /* ============================================================
+       9.  TRACKER
+       ============================================================ */
+    .tracker-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2.4rem;
+    }
+    @media (max-width: 700px) {
+      .tracker-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .subject-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+    .subject-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.8rem 1.2rem;
+      background: rgba(255,252,248,0.3);
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      transition: background 0.2s;
+    }
+    .subject-item:hover {
+      background: rgba(255,252,248,0.7);
+    }
+    .subject-item label {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      cursor: pointer;
+      flex: 1;
+      font-size: 1.5rem;
+    }
+    .subject-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+    }
+    .subject-hours {
+      font-size: 1.3rem;
+      color: var(--text-secondary);
+    }
+    .study-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.8rem;
+      margin-top: 1.6rem;
+    }
+    .stat-card {
+      text-align: center;
+      padding: 1.2rem;
+      background: rgba(255,252,248,0.3);
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+    .stat-number {
+      font-size: 3.2rem;
+      font-weight: 200;
+      font-family: 'Noto Serif JP', serif;
+    }
+    .stat-label {
+      font-size: 1.2rem;
+      letter-spacing: 0.08em;
+      color: var(--text-secondary);
+    }
+
+    /* ============================================================
+       10. RESOURCES
+       ============================================================ */
+    .resources-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1.6rem;
+    }
+    .resource-card {
+      padding: 1.6rem;
+      border-radius: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      text-decoration: none;
+      color: var(--text-primary);
+      transition: all 0.3s ease;
+    }
+    .resource-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 30px var(--shadow-hover);
+      background: var(--bg-card);
+    }
+    .resource-card .title {
+      font-weight: 500;
+      font-size: 1.6rem;
+      font-family: 'Noto Serif JP', serif;
+    }
+    .resource-card .desc {
+      font-size: 1.3rem;
+      color: var(--text-secondary);
+      margin-top: 0.4rem;
+    }
+    .resource-card .tag {
+      display: inline-block;
+      margin-top: 1.2rem;
+      font-size: 1.1rem;
+      padding: 0.2rem 1.2rem;
+      border-radius: 40px;
+      background: var(--accent-light);
+      color: var(--text-primary);
+    }
+
+    /* ============================================================
+       11. NOTES
+       ============================================================ */
+    .notes-input-group {
+      display: flex;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.6rem;
+    }
+    .notes-input-group input {
+      flex: 1;
+      min-width: 200px;
+      padding: 0.8rem 1.6rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 1.5rem;
+      background: rgba(255,252,248,0.5);
+      outline: none;
+      transition: border 0.2s;
+      color: var(--text-primary);
+    }
+    .notes-input-group input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(201,168,76,0.15);
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.8rem 2.4rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.4rem;
+      font-weight: 400;
+      background: var(--text-primary);
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      letter-spacing: 0.04em;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px var(--shadow-hover);
+    }
+    .btn-gold {
+      background: var(--accent);
+      color: var(--text-primary);
+    }
+    .btn-gold:hover {
+      background: #dbb95c;
+    }
+    .btn-vermilion {
+      background: #b33939;
+      color: #fff;
+    }
+    .btn-vermilion:hover {
+      background: #c94a4a;
+    }
+    .btn-outline {
+      background: transparent;
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+    }
+    .btn-outline:hover {
+      background: rgba(0,0,0,0.03);
+      transform: none;
+      box-shadow: none;
+    }
+    .btn-sm {
+      padding: 0.4rem 1.2rem;
+      font-size: 1.2rem;
+    }
+    .notes-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+    .note-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.8rem 1.6rem;
+      background: rgba(255,252,248,0.3);
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+    .note-item .note-text {
+      flex: 1;
+      font-size: 1.5rem;
+    }
+    .note-item .note-time {
+      font-size: 1.2rem;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      margin-left: 1.2rem;
+    }
+
+    /* ============================================================
+       12. QUOTES
+       ============================================================ */
+    .quote-box {
+      padding: 2.4rem;
+      border-radius: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--accent-light);
+      text-align: center;
+      max-width: 700px;
+      margin: 0 auto;
+      position: relative;
+    }
+    .quote-box::before {
+      content: '「';
+      font-size: 6rem;
+      color: var(--accent);
+      opacity: 0.15;
+      position: absolute;
+      top: -0.8rem;
+      left: 1.6rem;
+      font-family: 'Noto Serif JP', serif;
+    }
+    .quote-box::after {
+      content: '」';
+      font-size: 6rem;
+      color: var(--accent);
+      opacity: 0.15;
+      position: absolute;
+      bottom: -1.6rem;
+      right: 1.6rem;
+      font-family: 'Noto Serif JP', serif;
+    }
+    .quote-text {
+      font-size: 2.2rem;
+      font-weight: 300;
+      font-family: 'Noto Serif JP', serif;
+      line-height: 1.6;
+    }
+    .quote-author {
+      margin-top: 1.2rem;
+      font-size: 1.4rem;
+      color: var(--text-secondary);
+      letter-spacing: 0.08em;
+    }
+    .tips-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 1.6rem;
+      margin-top: 2.4rem;
+    }
+    .tip-card {
+      padding: 1.6rem;
+      border-radius: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      text-align: center;
+      transition: transform 0.3s ease;
+    }
+    .tip-card:hover {
+      transform: translateY(-3px);
+    }
+    .tip-card .emoji {
+      font-size: 3.2rem;
+      display: block;
+      margin-bottom: 0.4rem;
+    }
+    .tip-card .tip-title {
+      font-weight: 500;
+      font-size: 1.5rem;
+      font-family: 'Noto Serif JP', serif;
+    }
+    .tip-card .tip-desc {
+      font-size: 1.3rem;
+      color: var(--text-secondary);
+    }
+
+    /* ============================================================
+       13. FOOTER
+       ============================================================ */
+    .site-footer {
+      padding: 2.4rem 0 1.6rem;
+      border-top: 1px solid var(--border-color);
+      margin-top: 4.8rem;
+      text-align: center;
+      font-size: 1.3rem;
+      color: var(--text-secondary);
+    }
+    .footer-divider {
+      width: 60px;
+      height: 1px;
+      background: var(--accent-light);
+      margin: 0 auto 0.8rem;
+    }
+
+    /* ============================================================
+       14. TOAST
+       ============================================================ */
+    .toast {
+      position: fixed;
+      bottom: 2.4rem;
+      right: 2.4rem;
+      padding: 1.2rem 2.4rem;
+      border-radius: 12px;
+      background: var(--text-primary);
+      color: #fff;
+      font-size: 1.4rem;
+      box-shadow: 0 8px 32px var(--shadow-hover);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.4s ease;
+      z-index: 200;
+      pointer-events: none;
+      max-width: 400px;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    /* ============================================================
+       15. SEASON / TIME INDICATOR (top bar)
+       ============================================================ */
+    .season-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 1.3rem;
+      color: var(--text-secondary);
+      background: var(--bg-card);
+      padding: 0.3rem 1.6rem;
+      border-radius: 40px;
+      border: 1px solid var(--border-color);
+      backdrop-filter: blur(4px);
+      font-family: 'Noto Serif JP', serif;
+      letter-spacing: 0.04em;
+    }
+    .season-indicator .icon {
+      font-size: 1.8rem;
+    }
+
+    /* ============================================================
+       16. RESPONSIVE TWEAKS
+       ============================================================ */
+    @media (max-width: 500px) {
+      .countdown-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.8rem;
+      }
+      .countdown-number {
+        font-size: 4.8rem;
+      }
+      .study-stats {
+        grid-template-columns: 1fr 1fr;
+      }
+      .resources-grid {
+        grid-template-columns: 1fr;
+      }
+      .tips-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    @media (max-width: 380px) {
+      .countdown-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      .study-stats {
+        grid-template-columns: 1fr;
+      }
+      .tips-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ============================================================
+       17. PULSE ANIMATION
+       ============================================================ */
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.04); }
+      100% { transform: scale(1); }
+    }
+    .countdown-item.pulse .countdown-number {
+      animation: pulse 0.3s ease;
+    }
+
+    /* ============================================================
+       18. PRINT HIDE
+       ============================================================ */
+    @media print {
+      .site-header, .site-footer, .btn, .notes-input-group { display: none; }
+      .page { padding: 0; }
+      .card { box-shadow: none !important; border: 1px solid #ccc; }
+    }
+  </style>
 </head>
 <body>
 
-    <!-- ============================================================
-    TOAST
-    ============================================================ -->
-    <div id="toast" class="toast"></div>
+  <!-- ============================================================
+  TOAST
+  ============================================================ -->
+  <div id="toast" class="toast"></div>
 
-    <!-- ============================================================
-    HEADER
-    ============================================================ -->
-    <header class="site-header" id="siteHeader">
-        <div class="container header-inner">
-            <a href="#" class="logo" aria-label="NEET 2027 Countdown">
-                <span class="logo-icon">和</span>
-                <span>NEET 2027</span>
-                <span style="font-weight:300;font-size:1.4rem;opacity:0.5;letter-spacing:0.1em;">· 静</span>
-            </a>
+  <!-- ============================================================
+  HEADER
+  ============================================================ -->
+  <header class="site-header" id="siteHeader">
+    <div class="container header-inner">
+      <a href="#" class="logo">
+        <span class="logo-icon">静</span>
+        <span>NEET 2027</span>
+        <span style="font-weight:200;font-size:1.4rem;opacity:0.5;">· 和</span>
+      </a>
 
-            <button class="menu-toggle" id="menuToggle" aria-label="Toggle navigation" aria-expanded="false">
-                ☰
-            </button>
+      <button class="menu-toggle" id="menuToggle" aria-label="Menu">☰</button>
 
-            <ul class="nav-links" id="navLinks" role="navigation">
-                <li><a href="#" class="active" data-page="home">計時</a></li>
-                <li><a href="#" data-page="tracker">進捗</a></li>
-                <li><a href="#" data-page="resources">資料</a></li>
-                <li><a href="#" data-page="notes">覚書</a></li>
-                <li><a href="#" data-page="motivation">励まし</a></li>
-            </ul>
-        </div>
-    </header>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#" class="active" data-page="home">Countdown</a></li>
+        <li><a href="#" data-page="tracker">Tracker</a></li>
+        <li><a href="#" data-page="resources">Resources</a></li>
+        <li><a href="#" data-page="notes">Notes</a></li>
+        <li><a href="#" data-page="motivation">Motivation</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <!-- ============================================================
+  MAIN CONTENT
+  ============================================================ -->
+  <main class="container" id="mainContent">
+
+    <!-- Season / Time indicator (top) -->
+    <div style="display:flex;justify-content:center;margin:1.2rem 0 0.8rem;">
+      <div class="season-indicator" id="seasonIndicator">
+        <span class="icon" id="seasonIcon">🌸</span>
+        <span id="seasonLabel">Spring · Day</span>
+      </div>
+    </div>
 
     <!-- ============================================================
     PAGE: HOME (Countdown)
     ============================================================ -->
-    <main id="mainContent">
-        <section class="page active" id="page-home" role="tabpanel">
-            <div class="hero-section">
-                <div class="phase-badge" id="phaseBadge">📖 準備期間</div>
-                <h1>カウントダウン</h1>
-                <p class="subtitle" style="margin-top:0.4rem;">NEET 2027 · 静かなる覚悟</p>
-                <div class="deco-line"></div>
+    <section class="page active" id="page-home">
+      <div class="hero-section">
+        <div class="phase-badge" id="phaseBadge">📖 Preparation</div>
+        <h1>Countdown</h1>
+        <p class="subtitle">NEET 2027 · Serene Determination</p>
+        <div style="width:60px;height:2px;background:var(--accent);margin:1.2rem auto;opacity:0.4;"></div>
 
-                <!-- Countdown Grid -->
-                <div class="countdown-grid" id="countdownGrid">
-                    <div class="countdown-item" id="cd-days">
-                        <span class="countdown-number" id="days">00</span>
-                        <span class="countdown-label">日</span>
-                    </div>
-                    <div class="countdown-item" id="cd-hours">
-                        <span class="countdown-number" id="hours">00</span>
-                        <span class="countdown-label">時</span>
-                    </div>
-                    <div class="countdown-item" id="cd-minutes">
-                        <span class="countdown-number" id="minutes">00</span>
-                        <span class="countdown-label">分</span>
-                    </div>
-                    <div class="countdown-item" id="cd-seconds">
-                        <span class="countdown-number" id="seconds">00</span>
-                        <span class="countdown-label">秒</span>
-                    </div>
-                </div>
-
-                <!-- Progress -->
-                <div class="progress-wrapper">
-                    <div class="progress-track">
-                        <div class="progress-fill" id="progressFill" style="width:0%;"></div>
-                    </div>
-                    <div class="progress-label">
-                        <span id="progressLabelLeft">準備 0%</span>
-                        <span id="progressLabelRight">目標 2027</span>
-                    </div>
-                </div>
-
-                <p class="sub-message" id="subMessage">
-                    静かに、着実に。<span>一日一日</span>を大切に。
-                </p>
-            </div>
-
-            <!-- Quick stats -->
-            <div class="card" style="margin-top:var(--space-md);">
-                <div class="study-stats" style="grid-template-columns:repeat(3,1fr);">
-                    <div class="stat-card">
-                        <div class="stat-number" id="studyDays">0</div>
-                        <div class="stat-label">学習日数</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="studyStreak">0</div>
-                        <div class="stat-label">連続日数 🔥</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="totalHours">0</div>
-                        <div class="stat-label">総学習時間</div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ============================================================
-        PAGE: TRACKER
-        ============================================================ -->
-        <section class="page" id="page-tracker" role="tabpanel">
-            <h2>📊 進捗トラッカー</h2>
-            <p class="subtitle">今日の学習を記録し、継続を可視化</p>
-            <div class="deco-line"></div>
-
-            <div class="tracker-grid">
-                <!-- Subjects -->
-                <div class="card">
-                    <h3>📚 科目</h3>
-                    <p style="font-size:1.3rem;color:var(--color-indigo-soft);margin-bottom:var(--space-sm);">
-                        チェックを入れて学習完了を記録
-                    </p>
-                    <ul class="subject-list" id="subjectList">
-                        <li class="subject-item">
-                            <label>
-                                <input type="checkbox" data-subject="physics" />
-                                物理学
-                            </label>
-                            <span class="subject-hours" id="hours-physics">0h</span>
-                        </li>
-                        <li class="subject-item">
-                            <label>
-                                <input type="checkbox" data-subject="chemistry" />
-                                化学
-                            </label>
-                            <span class="subject-hours" id="hours-chemistry">0h</span>
-                        </li>
-                        <li class="subject-item">
-                            <label>
-                                <input type="checkbox" data-subject="biology" />
-                                生物学
-                            </label>
-                            <span class="subject-hours" id="hours-biology">0h</span>
-                        </li>
-                        <li class="subject-item">
-                            <label>
-                                <input type="checkbox" data-subject="botany" />
-                                植物学
-                            </label>
-                            <span class="subject-hours" id="hours-botany">0h</span>
-                        </li>
-                        <li class="subject-item">
-                            <label>
-                                <input type="checkbox" data-subject="zoology" />
-                                動物学
-                            </label>
-                            <span class="subject-hours" id="hours-zoology">0h</span>
-                        </li>
-                    </ul>
-                    <div style="margin-top:var(--space-md);display:flex;gap:var(--space-sm);flex-wrap:wrap;">
-                        <button class="btn btn-gold btn-sm" id="addStudyHour">+1 時間追加</button>
-                        <button class="btn btn-outline btn-sm" id="resetStudyHours">リセット</button>
-                    </div>
-                </div>
-
-                <!-- Stats -->
-                <div class="card">
-                    <h3>📈 今日の統計</h3>
-                    <div class="study-stats" style="grid-template-columns:1fr 1fr;margin-top:var(--space-sm);">
-                        <div class="stat-card">
-                            <div class="stat-number" id="todaySubjects">0</div>
-                            <div class="stat-label">今日の科目数</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-number" id="todayHours">0</div>
-                            <div class="stat-label">今日の時間 (h)</div>
-                        </div>
-                    </div>
-                    <div style="margin-top:var(--space-md);">
-                        <p style="font-size:1.3rem;color:var(--color-indigo-soft);">
-                            💡 毎日少しずつ。継続が力になる。
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ============================================================
-        PAGE: RESOURCES
-        ============================================================ -->
-        <section class="page" id="page-resources" role="tabpanel">
-            <h2>📖 資料ライブラリ</h2>
-            <p class="subtitle">NEET 対策に役立つ厳選リソース</p>
-            <div class="deco-line"></div>
-
-            <div class="resources-grid" id="resourcesGrid">
-                <a href="#" class="resource-card" onclick="return false;">
-                    <div class="title">📘 NCERT 教科書</div>
-                    <div class="desc">基礎を固めるための公式テキスト。全科目を網羅。</div>
-                    <span class="tag">必須</span>
-                </a>
-                <a href="#" class="resource-card" onclick="return false;">
-                    <div class="title">📗 過去問 10年分</div>
-                    <div class="desc">傾向を掴み、実戦力を養う。解説付き。</div>
-                    <span class="tag">実践</span>
-                </a>
-                <a href="#" class="resource-card" onclick="return false;">
-                    <div class="title">📕 参考書 ベスト3</div>
-                    <div class="desc">物理・化学・生物 それぞれの定番を厳選。</div>
-                    <span class="tag">おすすめ</span>
-                </a>
-                <a href="#" class="resource-card" onclick="return false;">
-                    <div class="title">🧪 実験・実習ノート</div>
-                    <div class="desc">生物・化学の実験問題対策に。</div>
-                    <span class="tag">実技</span>
-                </a>
-                <a href="#" class="resource-card" onclick="return false;">
-                    <div class="title">📝 模擬テスト 50回</div>
-                    <div class="desc">時間配分を鍛える。本番を想定して。</div>
-                    <span class="tag">模試</span>
-                </a>
-                <a href="#" class="resource-card" onclick="return false;">
-                    <div class="title">🎯 重要公式 まとめ</div>
-                    <div class="desc">物理・化学の公式を一覧で。暗記用。</div>
-                    <span class="tag">暗記</span>
-                </a>
-            </div>
-        </section>
-
-        <!-- ============================================================
-        PAGE: NOTES
-        ============================================================ -->
-        <section class="page" id="page-notes" role="tabpanel">
-            <h2>📝 覚書</h2>
-            <p class="subtitle">思いついたこと、大事なことを書き留める</p>
-            <div class="deco-line"></div>
-
-            <div class="card notes-area">
-                <div class="notes-input-group">
-                    <input type="text" id="noteInput" placeholder="新しいメモを入力…" maxlength="200" />
-                    <button class="btn btn-gold" id="addNoteBtn">➕ 追加</button>
-                </div>
-                <div class="notes-list" id="notesList">
-                    <!-- Notes will be rendered here -->
-                    <div style="text-align:center;padding:var(--space-md);color:var(--color-indigo-soft);font-size:1.4rem;">
-                        まだメモがありません。最初のメモを追加しましょう。
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ============================================================
-        PAGE: MOTIVATION
-        ============================================================ -->
-        <section class="page" id="page-motivation" role="tabpanel">
-            <h2>🌸 励まし</h2>
-            <p class="subtitle">心を整え、前に進むための言葉</p>
-            <div class="deco-line"></div>
-
-            <div class="quote-box" id="quoteBox">
-                <p class="quote-text" id="quoteText">
-                    成功は準備と努力の末に訪れる。
-                </p>
-                <p class="quote-author" id="quoteAuthor">— アブラハム・リンカーン</p>
-            </div>
-
-            <div style="text-align:center;margin-top:var(--space-md);">
-                <button class="btn btn-gold btn-sm" id="newQuoteBtn">🔄 別の言葉</button>
-            </div>
-
-            <div class="tips-grid">
-                <div class="tip-card">
-                    <span class="emoji">🌅</span>
-                    <div class="tip-title">早起き</div>
-                    <div class="tip-desc">朝の静かな時間は集中力が最高。</div>
-                </div>
-                <div class="tip-card">
-                    <span class="emoji">🧘</span>
-                    <div class="tip-title">マインドフルネス</div>
-                    <div class="tip-desc">5分の呼吸で心を整える。</div>
-                </div>
-                <div class="tip-card">
-                    <span class="emoji">📆</span>
-                    <div class="tip-title">計画性</div>
-                    <div class="tip-desc">1週間の目標を紙に書く。</div>
-                </div>
-                <div class="tip-card">
-                    <span class="emoji">💤</span>
-                    <div class="tip-title">休息</div>
-                    <div class="tip-desc">7時間の睡眠は記憶を定着させる。</div>
-                </div>
-                <div class="tip-card">
-                    <span class="emoji">📝</span>
-                    <div class="tip-title">アウトプット</div>
-                    <div class="tip-desc">教えるつもりで学ぶと深まる。</div>
-                </div>
-                <div class="tip-card">
-                    <span class="emoji">🎯</span>
-                    <div class="tip-title">明確な目標</div>
-                    <div class="tip-desc">「なぜNEETなのか」を忘れない。</div>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <!-- ============================================================
-    FOOTER
-    ============================================================ -->
-    <footer class="site-footer">
-        <div class="container footer-inner">
-            <div class="footer-divider"></div>
-            <p style="font-family:var(--font-jp);letter-spacing:0.08em;">
-                和 · NEET 2027 カウントダウン
-            </p>
-            <p style="font-size:1.2rem;opacity:0.6;">
-                静かなる努力が、未来を拓く。
-            </p>
-            <p style="font-size:1.1rem;opacity:0.4;margin-top:0.4rem;">
-                © 2026 · すべての瞬間を大切に
-            </p>
+        <div class="countdown-grid" id="countdownGrid">
+          <div class="countdown-item" id="cd-days">
+            <span class="countdown-number" id="days">00</span>
+            <span class="countdown-label">Days</span>
+          </div>
+          <div class="countdown-item" id="cd-hours">
+            <span class="countdown-number" id="hours">00</span>
+            <span class="countdown-label">Hours</span>
+          </div>
+          <div class="countdown-item" id="cd-minutes">
+            <span class="countdown-number" id="minutes">00</span>
+            <span class="countdown-label">Minutes</span>
+          </div>
+          <div class="countdown-item" id="cd-seconds">
+            <span class="countdown-number" id="seconds">00</span>
+            <span class="countdown-label">Seconds</span>
+          </div>
         </div>
-    </footer>
+
+        <div class="progress-wrapper">
+          <div class="progress-track">
+            <div class="progress-fill" id="progressFill" style="width:0%;"></div>
+          </div>
+          <div class="progress-label">
+            <span id="progressLabelLeft">Prep 0%</span>
+            <span id="progressLabelRight">Target 2027</span>
+          </div>
+        </div>
+
+        <p class="sub-message" id="subMessage">
+          Quietly, steadily. <span>One day</span> at a time.
+        </p>
+      </div>
+
+      <!-- Quick stats -->
+      <div class="card" style="margin-top:1.6rem;">
+        <div class="study-stats" style="grid-template-columns:repeat(3,1fr);">
+          <div class="stat-card">
+            <div class="stat-number" id="studyDays">0</div>
+            <div class="stat-label">Study Days</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="studyStreak">0</div>
+            <div class="stat-label">Streak 🔥</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="totalHours">0</div>
+            <div class="stat-label">Total Hours</div>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <!-- ============================================================
-    JAVASCRIPT —  FULL APPLICATION LOGIC
+    PAGE: TRACKER
     ============================================================ -->
-    <script>
-        (function() {
-            'use strict';
+    <section class="page" id="page-tracker">
+      <h2>📊 Progress Tracker</h2>
+      <p class="subtitle">Log today's study and visualise your consistency</p>
+      <div style="width:60px;height:2px;background:var(--accent);margin:1.2rem 0;opacity:0.4;"></div>
 
-            // ============================================================
-            // 1.  CONFIGURATION
-            // ============================================================
-            const CONFIG = {
-                PREP_END: new Date(2026, 11, 31, 23, 59, 59), // Dec 31 2026
-                REVISION_START: new Date(2027, 0, 1, 0, 0, 0), // Jan 1 2027
-                REVISION_END: new Date(2027, 3, 30, 23, 59, 59), // Apr 30 2027 (4 months)
-                TARGET_DATE: new Date(2027, 4, 1, 0, 0, 0), // May 1 2027 (NEET approx)
-                STORAGE_KEY: 'neet2027_data',
-            };
+      <div class="tracker-grid">
+        <div class="card">
+          <h3>📚 Subjects</h3>
+          <p style="font-size:1.3rem;color:var(--text-secondary);margin-bottom:0.8rem;">
+            Check to mark completed for today
+          </p>
+          <ul class="subject-list" id="subjectList">
+            <li class="subject-item">
+              <label><input type="checkbox" data-subject="physics" /> Physics</label>
+              <span class="subject-hours" id="hours-physics">0h</span>
+            </li>
+            <li class="subject-item">
+              <label><input type="checkbox" data-subject="chemistry" /> Chemistry</label>
+              <span class="subject-hours" id="hours-chemistry">0h</span>
+            </li>
+            <li class="subject-item">
+              <label><input type="checkbox" data-subject="biology" /> Biology</label>
+              <span class="subject-hours" id="hours-biology">0h</span>
+            </li>
+            <li class="subject-item">
+              <label><input type="checkbox" data-subject="botany" /> Botany</label>
+              <span class="subject-hours" id="hours-botany">0h</span>
+            </li>
+            <li class="subject-item">
+              <label><input type="checkbox" data-subject="zoology" /> Zoology</label>
+              <span class="subject-hours" id="hours-zoology">0h</span>
+            </li>
+          </ul>
+          <div style="margin-top:1.2rem;display:flex;gap:0.8rem;flex-wrap:wrap;">
+            <button class="btn btn-gold btn-sm" id="addStudyHour">+1 Hour</button>
+            <button class="btn btn-outline btn-sm" id="resetStudyHours">Reset Today</button>
+          </div>
+        </div>
 
-            // ============================================================
-            // 2.  STATE
-            // ============================================================
-            let state = {
-                phase: 'preparation', // 'preparation' | 'revision'
-                studyDays: 0,
-                streak: 0,
-                totalHours: 0,
-                todayHours: 0,
-                todaySubjects: 0,
-                subjectHours: { physics: 0, chemistry: 0, biology: 0, botany: 0, zoology: 0 },
-                subjectChecked: { physics: false, chemistry: false, biology: false, botany: false, zoology: false },
-                notes: [],
-                lastStudyDate: null,
-                // Countdown values cached
-                days: 0,
-                hours: 0,
-                minutes: 0,
-                seconds: 0,
-                progress: 0,
-            };
+        <div class="card">
+          <h3>📈 Today's Stats</h3>
+          <div class="study-stats" style="grid-template-columns:1fr 1fr;margin-top:0.8rem;">
+            <div class="stat-card">
+              <div class="stat-number" id="todaySubjects">0</div>
+              <div class="stat-label">Subjects Done</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number" id="todayHours">0</div>
+              <div class="stat-label">Hours Today</div>
+            </div>
+          </div>
+          <p style="font-size:1.3rem;color:var(--text-secondary);margin-top:1.2rem;">
+            💡 Small steps every day build momentum.
+          </p>
+        </div>
+      </div>
+    </section>
 
-            // ============================================================
-            // 3.  DOM REFS
-            // ============================================================
-            const $ = (sel) => document.querySelector(sel);
-            const $$ = (sel) => document.querySelectorAll(sel);
+    <!-- ============================================================
+    PAGE: RESOURCES
+    ============================================================ -->
+    <section class="page" id="page-resources">
+      <h2>📖 Resource Library</h2>
+      <p class="subtitle">Curated materials for NEET preparation</p>
+      <div style="width:60px;height:2px;background:var(--accent);margin:1.2rem 0;opacity:0.4;"></div>
 
-            const dom = {
-                days: $('#days'),
-                hours: $('#hours'),
-                minutes: $('#minutes'),
-                seconds: $('#seconds'),
-                progressFill: $('#progressFill'),
-                progressLabelLeft: $('#progressLabelLeft'),
-                progressLabelRight: $('#progressLabelRight'),
-                phaseBadge: $('#phaseBadge'),
-                subMessage: $('#subMessage'),
-                studyDays: $('#studyDays'),
-                studyStreak: $('#studyStreak'),
-                totalHours: $('#totalHours'),
-                todaySubjects: $('#todaySubjects'),
-                todayHours: $('#todayHours'),
-                subjectList: $('#subjectList'),
-                notesList: $('#notesList'),
-                noteInput: $('#noteInput'),
-                addNoteBtn: $('#addNoteBtn'),
-                quoteText: $('#quoteText'),
-                quoteAuthor: $('#quoteAuthor'),
-                newQuoteBtn: $('#newQuoteBtn'),
-                toast: $('#toast'),
-                menuToggle: $('#menuToggle'),
-                navLinks: $('#navLinks'),
-                pages: $$('.page'),
-                navAnchors: $$('.nav-links a'),
-                addHourBtn: $('#addStudyHour'),
-                resetHoursBtn: $('#resetStudyHours'),
-                countdownItems: $$('.countdown-item'),
-            };
+      <div class="resources-grid" id="resourcesGrid">
+        <a href="#" class="resource-card" onclick="return false;">
+          <div class="title">📘 NCERT Textbooks</div>
+          <div class="desc">Foundation for all subjects.</div>
+          <span class="tag">Essential</span>
+        </a>
+        <a href="#" class="resource-card" onclick="return false;">
+          <div class="title">📗 Past Papers (10 yrs)</div>
+          <div class="desc">Understand trends and practice.</div>
+          <span class="tag">Practice</span>
+        </a>
+        <a href="#" class="resource-card" onclick="return false;">
+          <div class="title">📕 Top Reference Books</div>
+          <div class="desc">Physics, Chemistry, Biology picks.</div>
+          <span class="tag">Recommended</span>
+        </a>
+        <a href="#" class="resource-card" onclick="return false;">
+          <div class="title">🧪 Lab & Practical Notes</div>
+          <div class="desc">For experiment‑based questions.</div>
+          <span class="tag">Practical</span>
+        </a>
+        <a href="#" class="resource-card" onclick="return false;">
+          <div class="title">📝 Mock Tests (50 sets)</div>
+          <div class="desc">Simulate exam conditions.</div>
+          <span class="tag">Mock</span>
+        </a>
+        <a href="#" class="resource-card" onclick="return false;">
+          <div class="title">🎯 Formula Sheets</div>
+          <div class="desc">Quick revision of key formulas.</div>
+          <span class="tag">Memorise</span>
+        </a>
+      </div>
+    </section>
 
-            // ============================================================
-            // 4.  QUOTES
-            // ============================================================
-            const QUOTES = [{
-                text: '成功は準備と努力の末に訪れる。',
-                author: '— アブラハム・リンカーン'
-            }, {
-                text: '学ぶことは、自分自身を再発見すること。',
-                author: '— 孟子'
-            }, {
-                text: '一歩一歩が道となる。',
-                author: '— 老子'
-            }, {
-                text: '努力は才能を超える。',
-                author: '— アルベルト・アインシュタイン'
-            }, {
-                text: '今日の小さな進歩が、明日の大きな飛躍を生む。',
-                author: '— 古いことわざ'
-            }, {
-                text: '静かなる水は深く流れる。',
-                author: '— 日本のことわざ'
-            }, {
-                text: '継続は力なり。',
-                author: '— ローマの格言'
-            }, {
-                text: '自分を信じることが、最初の勝利。',
-                author: '— トーマス・カーライル'
-            }, {
-                text: '夢は逃げない。逃げるのはいつも自分。',
-                author: '— ジグ・ジグラー'
-            }, {
-                text: '明日やろうは馬鹿やろう。',
-                author: '— 日本のことわざ'
-            }, {
-                text: '石の上にも三年。',
-                author: '— 日本のことわざ'
-            }, {
-                text: '七転び八起き。',
-                author: '— 日本のことわざ'
-            }, ];
+    <!-- ============================================================
+    PAGE: NOTES
+    ============================================================ -->
+    <section class="page" id="page-notes">
+      <h2>📝 Notes</h2>
+      <p class="subtitle">Jot down ideas, reminders, or insights</p>
+      <div style="width:60px;height:2px;background:var(--accent);margin:1.2rem 0;opacity:0.4;"></div>
 
-            let currentQuoteIndex = 0;
+      <div class="card">
+        <div class="notes-input-group">
+          <input type="text" id="noteInput" placeholder="Write a new note..." maxlength="200" />
+          <button class="btn btn-gold" id="addNoteBtn">➕ Add</button>
+        </div>
+        <div class="notes-list" id="notesList">
+          <div style="text-align:center;padding:1.6rem;color:var(--text-secondary);font-size:1.4rem;">
+            No notes yet. Start your first one.
+          </div>
+        </div>
+      </div>
+    </section>
 
-            // ============================================================
-            // 5.  STORAGE
-            // ============================================================
-            function loadState() {
-                try {
-                    const raw = localStorage.getItem(CONFIG.STORAGE_KEY);
-                    if (raw) {
-                        const saved = JSON.parse(raw);
-                        // Merge carefully
-                        Object.assign(state, saved);
-                        // Ensure nested objects exist
-                        if (!state.subjectHours) state.subjectHours = { physics: 0, chemistry: 0, biology: 0, botany: 0,
-                            zoology: 0 };
-                        if (!state.subjectChecked) state.subjectChecked = { physics: false, chemistry: false, biology: false,
-                            botany: false, zoology: false };
-                        if (!state.notes) state.notes = [];
-                        // Fix date strings
-                        if (state.lastStudyDate) {
-                            state.lastStudyDate = new Date(state.lastStudyDate);
-                        }
-                        // Recalculate today's stats from subjectChecked
-                        updateTodayStatsFromState();
-                        return true;
-                    }
-                } catch (e) { /* ignore */ }
-                return false;
+    <!-- ============================================================
+    PAGE: MOTIVATION
+    ============================================================ -->
+    <section class="page" id="page-motivation">
+      <h2>🌸 Motivation</h2>
+      <p class="subtitle">Words to calm the mind and move forward</p>
+      <div style="width:60px;height:2px;background:var(--accent);margin:1.2rem 0;opacity:0.4;"></div>
+
+      <div class="quote-box" id="quoteBox">
+        <p class="quote-text" id="quoteText">Success is the sum of small efforts repeated daily.</p>
+        <p class="quote-author" id="quoteAuthor">— Robert Collier</p>
+      </div>
+
+      <div style="text-align:center;margin-top:1.6rem;">
+        <button class="btn btn-gold btn-sm" id="newQuoteBtn">🔄 Another Quote</button>
+      </div>
+
+      <div class="tips-grid">
+        <div class="tip-card"><span class="emoji">🌅</span><div class="tip-title">Early Rise</div><div class="tip-desc">Quiet mornings sharpen focus.</div></div>
+        <div class="tip-card"><span class="emoji">🧘</span><div class="tip-title">Mindfulness</div><div class="tip-desc">5 minutes of breathing calms the mind.</div></div>
+        <div class="tip-card"><span class="emoji">📆</span><div class="tip-title">Plan Weekly</div><div class="tip-desc">Write down weekly goals.</div></div>
+        <div class="tip-card"><span class="emoji">💤</span><div class="tip-title">Rest Well</div><div class="tip-desc">7 hours of sleep consolidates memory.</div></div>
+        <div class="tip-card"><span class="emoji">📝</span><div class="tip-title">Output</div><div class="tip-desc">Teach to learn deeply.</div></div>
+        <div class="tip-card"><span class="emoji">🎯</span><div class="tip-title">Clear Goal</div><div class="tip-desc">Remember your 'why'.</div></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============================================================
+  FOOTER
+  ============================================================ -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-divider"></div>
+      <p style="font-family:'Noto Serif JP',serif;letter-spacing:0.08em;">和 · NEET 2027 Countdown</p>
+      <p style="font-size:1.2rem;opacity:0.6;">Quiet effort opens the future.</p>
+      <p style="font-size:1.1rem;opacity:0.4;margin-top:0.4rem;">© 2026 · Every moment matters</p>
+    </div>
+  </footer>
+
+  <!-- ============================================================
+  JAVASCRIPT – Full Application Logic + Dynamic Theming
+  ============================================================ -->
+  <script>
+    (function() {
+      'use strict';
+
+      // ============================================================
+      // 1.  CONFIGURATION
+      // ============================================================
+      const CONFIG = {
+        PREP_END: new Date(2026, 11, 31, 23, 59, 59),
+        REVISION_START: new Date(2027, 0, 1, 0, 0, 0),
+        REVISION_END: new Date(2027, 3, 30, 23, 59, 59),
+        TARGET_DATE: new Date(2027, 4, 1, 0, 0, 0),
+        STORAGE_KEY: 'neet2027_data',
+      };
+
+      // ============================================================
+      // 2.  STATE
+      // ============================================================
+      let state = {
+        phase: 'preparation',
+        studyDays: 0,
+        streak: 0,
+        totalHours: 0,
+        todayHours: 0,
+        todaySubjects: 0,
+        subjectHours: { physics: 0, chemistry: 0, biology: 0, botany: 0, zoology: 0 },
+        subjectChecked: { physics: false, chemistry: false, biology: false, botany: false, zoology: false },
+        notes: [],
+        lastStudyDate: null,
+      };
+
+      // ============================================================
+      // 3.  DOM REFS
+      // ============================================================
+      const $ = (s) => document.querySelector(s);
+      const $$ = (s) => document.querySelectorAll(s);
+      const dom = {
+        days: $('#days'),
+        hours: $('#hours'),
+        minutes: $('#minutes'),
+        seconds: $('#seconds'),
+        progressFill: $('#progressFill'),
+        progressLabelLeft: $('#progressLabelLeft'),
+        progressLabelRight: $('#progressLabelRight'),
+        phaseBadge: $('#phaseBadge'),
+        subMessage: $('#subMessage'),
+        studyDays: $('#studyDays'),
+        studyStreak: $('#studyStreak'),
+        totalHours: $('#totalHours'),
+        todaySubjects: $('#todaySubjects'),
+        todayHours: $('#todayHours'),
+        notesList: $('#notesList'),
+        noteInput: $('#noteInput'),
+        addNoteBtn: $('#addNoteBtn'),
+        quoteText: $('#quoteText'),
+        quoteAuthor: $('#quoteAuthor'),
+        newQuoteBtn: $('#newQuoteBtn'),
+        toast: $('#toast'),
+        menuToggle: $('#menuToggle'),
+        navLinks: $('#navLinks'),
+        pages: $$('.page'),
+        navAnchors: $$('.nav-links a'),
+        addHourBtn: $('#addStudyHour'),
+        resetHoursBtn: $('#resetStudyHours'),
+        countdownItems: $$('.countdown-item'),
+        seasonIcon: $('#seasonIcon'),
+        seasonLabel: $('#seasonLabel'),
+        root: document.documentElement,
+      };
+
+      // ============================================================
+      // 4.  THEMING ENGINE (Season + Time of day)
+      // ============================================================
+      function getSeasonAndTime() {
+        const now = new Date();
+        const month = now.getMonth(); // 0=Jan
+        const hours = now.getHours();
+        const isDay = hours >= 6 && hours < 18;
+
+        let season = '';
+        let icon = '';
+        let label = '';
+
+        if (month >= 2 && month <= 5) { // Mar–Jun
+          season = 'summer';
+          icon = '☀️';
+          label = 'Summer';
+        } else if (month >= 6 && month <= 8) { // Jul–Sep
+          season = 'monsoon';
+          icon = '🌧️';
+          label = 'Monsoon';
+        } else if (month >= 9 && month <= 10) { // Oct–Nov
+          season = 'autumn';
+          icon = '🍂';
+          label = 'Autumn';
+        } else { // Dec–Feb
+          season = 'winter';
+          icon = '❄️';
+          label = 'Winter';
+        }
+
+        label += isDay ? ' · Day' : ' · Night';
+        return { season, icon, label, isDay };
+      }
+
+      function applyTheme(season, isDay) {
+        const root = dom.root;
+        // Base colours per season (light mode day, dark mode night)
+        let bg, card, text, textSec, accent, accentLight, border, shadow, badgeBg, badgeText, patternColor;
+
+        const dayPalette = {
+          summer: {
+            bg: '#fdf6ed',
+            card: 'rgba(255, 248, 235, 0.7)',
+            text: '#3d2b1a',
+            textSec: '#7a5a3a',
+            accent: '#d4a373',
+            accentLight: '#f0d5b0',
+            border: 'rgba(61, 43, 26, 0.1)',
+            shadow: 'rgba(61, 43, 26, 0.08)',
+            badgeBg: '#f0d5b0',
+            badgeText: '#3d2b1a',
+            patternColor: '#3d2b1a',
+          },
+          monsoon: {
+            bg: '#e8f0f0',
+            card: 'rgba(235, 245, 245, 0.7)',
+            text: '#1a2e3a',
+            textSec: '#3a5a6a',
+            accent: '#4a7a8a',
+            accentLight: '#a0c4d4',
+            border: 'rgba(26, 46, 58, 0.1)',
+            shadow: 'rgba(26, 46, 58, 0.08)',
+            badgeBg: '#a0c4d4',
+            badgeText: '#1a2e3a',
+            patternColor: '#1a2e3a',
+          },
+          autumn: {
+            bg: '#f5efe6',
+            card: 'rgba(245, 235, 220, 0.7)',
+            text: '#3a2a1a',
+            textSec: '#7a5a3a',
+            accent: '#b87c4a',
+            accentLight: '#e0c4a0',
+            border: 'rgba(58, 42, 26, 0.1)',
+            shadow: 'rgba(58, 42, 26, 0.08)',
+            badgeBg: '#e0c4a0',
+            badgeText: '#3a2a1a',
+            patternColor: '#3a2a1a',
+          },
+          winter: {
+            bg: '#f0f2f5',
+            card: 'rgba(240, 242, 245, 0.7)',
+            text: '#1a1a2e',
+            textSec: '#4a4a6a',
+            accent: '#7a8a9a',
+            accentLight: '#b0c0d0',
+            border: 'rgba(26, 26, 46, 0.1)',
+            shadow: 'rgba(26, 26, 46, 0.08)',
+            badgeBg: '#b0c0d0',
+            badgeText: '#1a1a2e',
+            patternColor: '#1a1a2e',
+          }
+        };
+
+        const nightPalette = {
+          summer: {
+            bg: '#1e1a16',
+            card: 'rgba(40, 35, 30, 0.7)',
+            text: '#e8ddd0',
+            textSec: '#b0a090',
+            accent: '#d4a373',
+            accentLight: '#b08050',
+            border: 'rgba(200, 180, 160, 0.15)',
+            shadow: 'rgba(0,0,0,0.4)',
+            badgeBg: '#b08050',
+            badgeText: '#e8ddd0',
+            patternColor: '#e8ddd0',
+          },
+          monsoon: {
+            bg: '#141c20',
+            card: 'rgba(25, 35, 40, 0.7)',
+            text: '#d0e0e8',
+            textSec: '#90aab0',
+            accent: '#6a9aaa',
+            accentLight: '#4a7a8a',
+            border: 'rgba(160, 190, 200, 0.15)',
+            shadow: 'rgba(0,0,0,0.4)',
+            badgeBg: '#4a7a8a',
+            badgeText: '#d0e0e8',
+            patternColor: '#d0e0e8',
+          },
+          autumn: {
+            bg: '#1e1814',
+            card: 'rgba(40, 32, 26, 0.7)',
+            text: '#e8ddd0',
+            textSec: '#b0a090',
+            accent: '#b87c4a',
+            accentLight: '#8a5a3a',
+            border: 'rgba(200, 170, 140, 0.15)',
+            shadow: 'rgba(0,0,0,0.4)',
+            badgeBg: '#8a5a3a',
+            badgeText: '#e8ddd0',
+            patternColor: '#e8ddd0',
+          },
+          winter: {
+            bg: '#1a1c20',
+            card: 'rgba(30, 34, 40, 0.7)',
+            text: '#e0e4ea',
+            textSec: '#909aa8',
+            accent: '#8a9aaa',
+            accentLight: '#6a7a8a',
+            border: 'rgba(160, 170, 180, 0.15)',
+            shadow: 'rgba(0,0,0,0.4)',
+            badgeBg: '#6a7a8a',
+            badgeText: '#e0e4ea',
+            patternColor: '#e0e4ea',
+          }
+        };
+
+        const palette = isDay ? dayPalette[season] : nightPalette[season];
+
+        bg = palette.bg;
+        card = palette.card;
+        text = palette.text;
+        textSec = palette.textSec;
+        accent = palette.accent;
+        accentLight = palette.accentLight;
+        border = palette.border;
+        shadow = palette.shadow;
+        badgeBg = palette.badgeBg;
+        badgeText = palette.badgeText;
+        patternColor = palette.patternColor;
+
+        // Apply to CSS variables
+        root.style.setProperty('--bg-primary', bg);
+        root.style.setProperty('--bg-card', card);
+        root.style.setProperty('--text-primary', text);
+        root.style.setProperty('--text-secondary', textSec);
+        root.style.setProperty('--accent', accent);
+        root.style.setProperty('--accent-light', accentLight);
+        root.style.setProperty('--border-color', border);
+        root.style.setProperty('--shadow', shadow);
+        root.style.setProperty('--badge-bg', badgeBg);
+        root.style.setProperty('--badge-text', badgeText);
+
+        // Update pattern with new colour
+        const encoded = encodeURIComponent(patternColor);
+        const pattern = `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='${encoded}' fill-opacity='0.04'%3E%3Cpath d='M20 0v40M0 20h40'/%3E%3C/g%3E%3C/svg%3E")`;
+        root.style.setProperty('--pattern-url', pattern);
+
+        // Update season indicator
+        const info = getSeasonAndTime();
+        dom.seasonIcon.textContent = info.icon;
+        dom.seasonLabel.textContent = info.label;
+
+        // Also update badge background for phase
+        // will be done in render
+      }
+
+      // ============================================================
+      // 5.  STORAGE
+      // ============================================================
+      function loadState() {
+        try {
+          const raw = localStorage.getItem(CONFIG.STORAGE_KEY);
+          if (raw) {
+            const saved = JSON.parse(raw);
+            Object.assign(state, saved);
+            if (!state.subjectHours) state.subjectHours = { physics: 0, chemistry: 0, biology: 0, botany: 0, zoology: 0 };
+            if (!state.subjectChecked) state.subjectChecked = { physics: false, chemistry: false, biology: false, botany: false,
+              zoology: false };
+            if (!state.notes) state.notes = [];
+            if (state.lastStudyDate) state.lastStudyDate = new Date(state.lastStudyDate);
+            updateTodayStats();
+            return true;
+          }
+        } catch (e) {}
+        return false;
+      }
+
+      function saveState() {
+        try {
+          const toSave = { ...state };
+          if (toSave.lastStudyDate) toSave.lastStudyDate = toSave.lastStudyDate.toISOString();
+          localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(toSave));
+        } catch (e) {}
+      }
+
+      function updateTodayStats() {
+        let count = 0;
+        let hours = 0;
+        for (const key of Object.keys(state.subjectChecked)) {
+          if (state.subjectChecked[key]) count++;
+          hours += state.subjectHours[key] || 0;
+        }
+        state.todaySubjects = count;
+        state.todayHours = hours;
+      }
+
+      // ============================================================
+      // 6.  COUNTDOWN
+      // ============================================================
+      function getPhase() {
+        const now = new Date();
+        return now < CONFIG.PREP_END ? 'preparation' : 'revision';
+      }
+
+      function getCountdownTarget() {
+        return getPhase() === 'preparation' ? CONFIG.PREP_END : CONFIG.REVISION_END;
+      }
+
+      function computeCountdown() {
+        const now = new Date();
+        const target = getCountdownTarget();
+        const diff = target - now;
+        if (diff <= 0) return { days: 0, hours: 0, minutes: 0, seconds: 0, progress: 100 };
+        const days = Math.floor(diff / (86400000));
+        const hours = Math.floor((diff % 86400000) / 3600000);
+        const minutes = Math.floor((diff % 3600000) / 60000);
+        const seconds = Math.floor((diff % 60000) / 1000);
+        let progress = 0;
+        const phase = getPhase();
+        if (phase === 'preparation') {
+          const total = CONFIG.PREP_END - new Date(2026, 0, 1);
+          const elapsed = now - new Date(2026, 0, 1);
+          progress = Math.min(100, Math.max(0, (elapsed / total) * 100));
+        } else {
+          const total = CONFIG.REVISION_END - CONFIG.REVISION_START;
+          const elapsed = now - CONFIG.REVISION_START;
+          progress = Math.min(100, Math.max(0, (elapsed / total) * 100));
+        }
+        return { days, hours, minutes, seconds, progress: Math.round(progress) };
+      }
+
+      let prevCountdown = { days: -1, hours: -1, minutes: -1, seconds: -1 };
+
+      function renderCountdown() {
+        const cd = computeCountdown();
+        const pad = n => String(n).padStart(2, '0');
+        dom.days.textContent = pad(cd.days);
+        dom.hours.textContent = pad(cd.hours);
+        dom.minutes.textContent = pad(cd.minutes);
+        dom.seconds.textContent = pad(cd.seconds);
+        dom.progressFill.style.width = cd.progress + '%';
+
+        const phase = getPhase();
+        const label = phase === 'preparation' ? 'Prep' : 'Revision';
+        dom.progressLabelLeft.textContent = `${label} ${cd.progress}%`;
+        dom.progressLabelRight.textContent = phase === 'preparation' ? 'Target 2027' : 'Final Sprint';
+
+        dom.phaseBadge.textContent = phase === 'preparation' ? '📖 Preparation' : '⚡ Revision';
+        dom.phaseBadge.className = 'phase-badge' + (phase === 'revision' ? ' revision' : '');
+
+        dom.subMessage.innerHTML = phase === 'preparation' ?
+          'Quietly, steadily. <span>One day</span> at a time.' :
+          'Final push. <span>Stay focused</span> and finish strong.';
+
+        // Pulse
+        if (cd.days !== prevCountdown.days || cd.hours !== prevCountdown.hours ||
+          cd.minutes !== prevCountdown.minutes || cd.seconds !== prevCountdown.seconds) {
+          dom.countdownItems.forEach(el => {
+            el.classList.remove('pulse');
+            void el.offsetWidth;
+            el.classList.add('pulse');
+          });
+          prevCountdown = { days: cd.days, hours: cd.hours, minutes: cd.minutes, seconds: cd.seconds };
+        }
+
+        // Stats
+        dom.studyDays.textContent = state.studyDays || 0;
+        dom.studyStreak.textContent = state.streak || 0;
+        dom.totalHours.textContent = state.totalHours || 0;
+        dom.todaySubjects.textContent = state.todaySubjects || 0;
+        dom.todayHours.textContent = state.todayHours || 0;
+
+        // Subject hours
+        for (const key of Object.keys(state.subjectHours)) {
+          const el = document.getElementById(`hours-${key}`);
+          if (el) el.textContent = state.subjectHours[key] + 'h';
+        }
+
+        // Checkboxes
+        for (const key of Object.keys(state.subjectChecked)) {
+          const cb = document.querySelector(`input[data-subject="${key}"]`);
+          if (cb) cb.checked = state.subjectChecked[key];
+        }
+
+        renderNotes();
+        saveState();
+      }
+
+      // ============================================================
+      // 7.  NOTES
+      // ============================================================
+      function renderNotes() {
+        const list = dom.notesList;
+        if (!state.notes || state.notes.length === 0) {
+          list.innerHTML =
+            `<div style="text-align:center;padding:1.6rem;color:var(--text-secondary);font-size:1.4rem;">No notes yet. Start your first one.</div>`;
+          return;
+        }
+        list.innerHTML = state.notes.map((note, i) => `
+              <div class="note-item">
+                <span class="note-text">${escapeHtml(note.text)}</span>
+                <span class="note-time">${note.time || ''}</span>
+                <button class="btn btn-vermilion btn-sm delete-note" data-index="${i}">✕</button>
+              </div>
+            `).join('');
+        list.querySelectorAll('.delete-note').forEach(btn => {
+          btn.addEventListener('click', function() {
+            const idx = parseInt(this.dataset.index);
+            if (idx >= 0 && idx < state.notes.length) {
+              state.notes.splice(idx, 1);
+              saveState();
+              renderNotes();
+              showToast('🗑️ Note deleted');
             }
+          });
+        });
+      }
 
-            function saveState() {
-                try {
-                    const toSave = { ...state };
-                    // Convert dates to strings
-                    if (toSave.lastStudyDate) {
-                        toSave.lastStudyDate = toSave.lastStudyDate.toISOString();
-                    }
-                    localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(toSave));
-                } catch (e) { /* ignore */ }
+      function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+      }
+
+      function addNote(text) {
+        if (!text || text.trim() === '') return false;
+        const now = new Date();
+        const timeStr = now.toLocaleString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        state.notes.unshift({ text: text.trim(), time: timeStr });
+        if (state.notes.length > 100) state.notes = state.notes.slice(0, 100);
+        saveState();
+        renderNotes();
+        showToast('📝 Note added');
+        return true;
+      }
+
+      // ============================================================
+      // 8.  STUDY TRACKER
+      // ============================================================
+      function toggleSubject(subject, checked) {
+        state.subjectChecked[subject] = checked;
+        updateTodayStats();
+
+        if (checked) {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          if (state.lastStudyDate) {
+            const last = new Date(state.lastStudyDate);
+            last.setHours(0, 0, 0, 0);
+            if (today > last) {
+              state.studyDays = (state.studyDays || 0) + 1;
+              const diffDays = Math.floor((today - last) / 86400000);
+              state.streak = diffDays === 1 ? (state.streak || 0) + 1 : diffDays > 1 ? 1 : state.streak || 0;
+              state.lastStudyDate = new Date();
             }
+          } else {
+            state.studyDays = (state.studyDays || 0) + 1;
+            state.streak = 1;
+            state.lastStudyDate = new Date();
+          }
+        }
+        saveState();
+        renderCountdown();
+      }
 
-            function updateTodayStatsFromState() {
-                let count = 0;
-                let hours = 0;
-                for (const [key, val] of Object.entries(state.subjectChecked)) {
-                    if (val) count++;
-                    hours += state.subjectHours[key] || 0;
-                }
-                state.todaySubjects = count;
-                state.todayHours = hours;
-            }
+      function addStudyHour() {
+        let added = false;
+        for (const key of Object.keys(state.subjectChecked)) {
+          if (state.subjectChecked[key]) {
+            state.subjectHours[key] = (state.subjectHours[key] || 0) + 1;
+            state.totalHours = (state.totalHours || 0) + 1;
+            state.todayHours = (state.todayHours || 0) + 1;
+            added = true;
+          }
+        }
+        if (!added) {
+          showToast('⚠️ Check at least one subject first');
+          return;
+        }
+        saveState();
+        renderCountdown();
+        showToast('⏱️ +1 hour added');
+      }
 
-            // ============================================================
-            // 6.  COUNTDOWN ENGINE
-            // ============================================================
-            function getPhase() {
-                const now = new Date();
-                if (now < CONFIG.PREP_END) return 'preparation';
-                return 'revision';
-            }
+      function resetStudyHours() {
+        if (!confirm('Reset today\'s hours and checks?')) return;
+        for (const key of Object.keys(state.subjectHours)) state.subjectHours[key] = 0;
+        state.todayHours = 0;
+        state.todaySubjects = 0;
+        for (const key of Object.keys(state.subjectChecked)) state.subjectChecked[key] = false;
+        document.querySelectorAll('input[data-subject]').forEach(cb => cb.checked = false);
+        saveState();
+        renderCountdown();
+        showToast('🔄 Reset today');
+      }
 
-            function getCountdownTarget() {
-                const phase = getPhase();
-                if (phase === 'preparation') {
-                    return CONFIG.PREP_END;
-                } else {
-                    return CONFIG.REVISION_END;
-                }
-            }
+      // ============================================================
+      // 9.  QUOTES
+      // ============================================================
+      const QUOTES = [
+        { text: 'Success is the sum of small efforts repeated daily.', author: '— Robert Collier' },
+        { text: 'Quiet endurance is the key to mastery.', author: '— Japanese Proverb' },
+        { text: 'The only way to do great work is to love what you do.', author: '— Steve Jobs' },
+        { text: 'Patience and diligence, like faith, remove mountains.', author: '— William Penn' },
+        { text: 'It does not matter how slowly you go as long as you do not stop.', author: '— Confucius' },
+        { text: 'Fall seven times, stand up eight.', author: '— Japanese Proverb' },
+        { text: 'Believe you can and you\'re halfway there.', author: '— Theodore Roosevelt' },
+        { text: 'Discipline is the bridge between goals and accomplishment.', author: '— Jim Rohn' },
+        { text: 'The secret of getting ahead is getting started.', author: '— Mark Twain' },
+        { text: 'He who has a why can endure any how.', author: '— Friedrich Nietzsche' },
+      ];
+      let currentQuote = 0;
 
-            function getPhaseLabel() {
-                const phase = getPhase();
-                if (phase === 'preparation') {
-                    return '📖 準備期間';
-                } else {
-                    return '⚡ 復習期間';
-                }
-            }
+      function showRandomQuote() {
+        let idx = Math.floor(Math.random() * QUOTES.length);
+        if (idx === currentQuote && QUOTES.length > 1) idx = (idx + 1) % QUOTES.length;
+        currentQuote = idx;
+        const q = QUOTES[idx];
+        dom.quoteText.textContent = q.text;
+        dom.quoteAuthor.textContent = q.author;
+        // subtle fade
+        dom.quoteText.style.opacity = '0';
+        dom.quoteAuthor.style.opacity = '0';
+        setTimeout(() => {
+          dom.quoteText.style.opacity = '1';
+          dom.quoteAuthor.style.opacity = '1';
+        }, 200);
+      }
 
-            function getPhaseClass() {
-                const phase = getPhase();
-                return phase === 'preparation' ? '' : 'revision';
-            }
+      // ============================================================
+      // 10. TOAST
+      // ============================================================
+      let toastTimeout = null;
 
-            function getSubMessage() {
-                const phase = getPhase();
-                if (phase === 'preparation') {
-                    return '静かに、着実に。<span>一日一日</span>を大切に。';
-                } else {
-                    return '最後の追い込み。<span>集中</span>して、やり抜く。';
-                }
-            }
+      function showToast(msg) {
+        const el = dom.toast;
+        el.textContent = msg;
+        el.classList.add('show');
+        clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => el.classList.remove('show'), 2800);
+      }
 
-            function computeCountdown() {
-                const now = new Date();
-                const target = getCountdownTarget();
-                const diff = target - now;
+      // ============================================================
+      // 11. NAVIGATION
+      // ============================================================
+      function navigateTo(pageId) {
+        dom.navAnchors.forEach(a => a.classList.toggle('active', a.dataset.page === pageId));
+        dom.pages.forEach(p => {
+          p.classList.remove('active');
+          if (p.id === `page-${pageId}`) p.classList.add('active');
+        });
+        dom.navLinks.classList.remove('open');
+        dom.menuToggle.textContent = '☰';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
 
-                if (diff <= 0) {
-                    return { days: 0, hours: 0, minutes: 0, seconds: 0, progress: 100 };
-                }
+      // ============================================================
+      // 12. INIT
+      // ============================================================
+      function init() {
+        // Load state
+        loadState();
 
-                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+        // Apply theme (season + time)
+        const { season, isDay, icon, label } = getSeasonAndTime();
+        applyTheme(season, isDay);
+        dom.seasonIcon.textContent = icon;
+        dom.seasonLabel.textContent = label;
 
-                // Progress: from now to target
-                let progress = 0;
-                const phase = getPhase();
-                if (phase === 'preparation') {
-                    const total = CONFIG.PREP_END - new Date(2026, 0, 1);
-                    const elapsed = now - new Date(2026, 0, 1);
-                    progress = Math.min(100, Math.max(0, (elapsed / total) * 100));
-                } else {
-                    const total = CONFIG.REVISION_END - CONFIG.REVISION_START;
-                    const elapsed = now - CONFIG.REVISION_START;
-                    progress = Math.min(100, Math.max(0, (elapsed / total) * 100));
-                }
+        // Render countdown
+        renderCountdown();
+        setInterval(renderCountdown, 1000);
 
-                return { days, hours, minutes, seconds, progress: Math.round(progress) };
-            }
+        // Event listeners
+        dom.navAnchors.forEach(a => {
+          a.addEventListener('click', function(e) {
+            e.preventDefault();
+            const page = this.dataset.page;
+            if (page) navigateTo(page);
+          });
+        });
 
-            // ============================================================
-            // 7.  RENDER COUNTDOWN
-            // ============================================================
-            let prevCountdown = { days: -1, hours: -1, minutes: -1, seconds: -1 };
+        dom.menuToggle.addEventListener('click', function() {
+          const open = dom.navLinks.classList.toggle('open');
+          this.textContent = open ? '✕' : '☰';
+        });
 
-            function renderCountdown() {
-                const cd = computeCountdown();
-                const { days, hours, minutes, seconds, progress } = cd;
+        document.querySelectorAll('input[data-subject]').forEach(cb => {
+          cb.addEventListener('change', function() {
+            toggleSubject(this.dataset.subject, this.checked);
+          });
+        });
 
-                // Update DOM
-                const pad = (n) => String(n).padStart(2, '0');
-                dom.days.textContent = pad(days);
-                dom.hours.textContent = pad(hours);
-                dom.minutes.textContent = pad(minutes);
-                dom.seconds.textContent = pad(seconds);
+        dom.addHourBtn.addEventListener('click', addStudyHour);
+        dom.resetHoursBtn.addEventListener('click', resetStudyHours);
 
-                // Progress
-                dom.progressFill.style.width = progress + '%';
-                const phase = getPhase();
-                const label = phase === 'preparation' ? '準備' : '復習';
-                dom.progressLabelLeft.textContent = `${label} ${progress}%`;
-                dom.progressLabelRight.textContent = phase === 'preparation' ? '2027 本番' : '最終調整';
+        dom.addNoteBtn.addEventListener('click', function() {
+          const val = dom.noteInput.value;
+          if (addNote(val)) dom.noteInput.value = '';
+          else showToast('⚠️ Enter a note');
+        });
+        dom.noteInput.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter') dom.addNoteBtn.click();
+        });
 
-                // Phase badge
-                dom.phaseBadge.textContent = getPhaseLabel();
-                dom.phaseBadge.className = 'phase-badge' + (phase === 'revision' ? ' revision' : '');
+        dom.newQuoteBtn.addEventListener('click', showRandomQuote);
+        showRandomQuote();
 
-                // Sub message
-                dom.subMessage.innerHTML = getSubMessage();
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+          if (e.ctrlKey || e.metaKey || e.altKey) return;
+          if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+          const key = e.key.toLowerCase();
+          if (key === 'h') navigateTo('home');
+          else if (key === 't') navigateTo('tracker');
+          else if (key === 'r') navigateTo('resources');
+          else if (key === 'n') navigateTo('notes');
+          else if (key === 'm') navigateTo('motivation');
+        });
 
-                // Pulse animation on change
-                const changed = (prevCountdown.days !== days || prevCountdown.hours !== hours ||
-                    prevCountdown.minutes !== minutes || prevCountdown.seconds !== seconds);
-                if (changed) {
-                    dom.countdownItems.forEach(el => {
-                        el.classList.remove('pulse');
-                        // Force reflow
-                        void el.offsetWidth;
-                        el.classList.add('pulse');
-                    });
-                    prevCountdown = { days, hours, minutes, seconds };
-                }
+        // Re-apply theme on hour change (every 30 min) – just to be safe
+        setInterval(() => {
+          const { season, isDay, icon, label } = getSeasonAndTime();
+          // only update if changed
+          const currentIcon = dom.seasonIcon.textContent;
+          if (currentIcon !== icon) {
+            applyTheme(season, isDay);
+            dom.seasonIcon.textContent = icon;
+            dom.seasonLabel.textContent = label;
+          }
+        }, 60000); // every minute
 
-                // Update study stats display
-                dom.studyDays.textContent = state.studyDays || 0;
-                dom.studyStreak.textContent = state.streak || 0;
-                dom.totalHours.textContent = state.totalHours || 0;
-                dom.todaySubjects.textContent = state.todaySubjects || 0;
-                dom.todayHours.textContent = state.todayHours || 0;
+        showToast('🌸 Welcome. Quiet effort begins now.');
+        console.log('🌸 NEET 2027 · Seasonal Japanese Aesthetic');
+        console.log('⌨️ Shortcuts: H=Home, T=Tracker, R=Resources, N=Notes, M=Motivation');
+      }
 
-                // Update subject hours in tracker
-                for (const [key, val] of Object.entries(state.subjectHours)) {
-                    const el = document.getElementById(`hours-${key}`);
-                    if (el) el.textContent = val + 'h';
-                }
+      // ============================================================
+      // 13. START
+      // ============================================================
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+      } else {
+        init();
+      }
 
-                // Update checkboxes
-                for (const [key, val] of Object.entries(state.subjectChecked)) {
-                    const cb = document.querySelector(`input[data-subject="${key}"]`);
-                    if (cb) cb.checked = val;
-                }
-
-                // Update notes
-                renderNotes();
-
-                // Save state periodically
-                saveState();
-            }
-
-            // ============================================================
-            // 8.  NOTES
-            // ============================================================
-            function renderNotes() {
-                const list = dom.notesList;
-                if (!state.notes || state.notes.length === 0) {
-                    list.innerHTML = `
-                            <div style="text-align:center;padding:var(--space-md);color:var(--color-indigo-soft);font-size:1.4rem;">
-                                まだメモがありません。最初のメモを追加しましょう。
-                            </div>
-                        `;
-                    return;
-                }
-
-                list.innerHTML = state.notes.map((note, idx) => `
-                        <div class="note-item">
-                            <span class="note-text">${escapeHtml(note.text)}</span>
-                            <span class="note-time">${note.time || ''}</span>
-                            <button class="btn btn-vermilion btn-sm delete-note" data-index="${idx}">✕</button>
-                        </div>
-                    `).join('');
-
-                // Bind delete events
-                list.querySelectorAll('.delete-note').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        const idx = parseInt(this.dataset.index);
-                        deleteNote(idx);
-                    });
-                });
-            }
-
-            function escapeHtml(str) {
-                const div = document.createElement('div');
-                div.textContent = str;
-                return div.innerHTML;
-            }
-
-            function addNote(text) {
-                if (!text || text.trim() === '') return false;
-                const now = new Date();
-                const timeStr = now.toLocaleString('ja-JP', { month: 'short', day: 'numeric', hour: '2-digit',
-                    minute: '2-digit' });
-                state.notes.unshift({ text: text.trim(), time: timeStr });
-                if (state.notes.length > 100) state.notes = state.notes.slice(0, 100);
-                saveState();
-                renderNotes();
-                showToast('📝 メモを追加しました');
-                return true;
-            }
-
-            function deleteNote(index) {
-                if (index >= 0 && index < state.notes.length) {
-                    state.notes.splice(index, 1);
-                    saveState();
-                    renderNotes();
-                    showToast('🗑️ メモを削除しました');
-                }
-            }
-
-            // ============================================================
-            // 9.  STUDY TRACKER
-            // ============================================================
-            function toggleSubject(subject, checked) {
-                state.subjectChecked[subject] = checked;
-                updateTodayStatsFromState();
-                // If checked, add to study days tracking
-                if (checked) {
-                    // Check if it's a new day
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
-                    if (state.lastStudyDate) {
-                        const last = new Date(state.lastStudyDate);
-                        last.setHours(0, 0, 0, 0);
-                        if (today > last) {
-                            // New day: increment study days and streak
-                            state.studyDays = (state.studyDays || 0) + 1;
-                            // Streak: if yesterday was studied, increment, else reset
-                            const diffDays = Math.floor((today - last) / (1000 * 60 * 60 * 24));
-                            if (diffDays === 1) {
-                                state.streak = (state.streak || 0) + 1;
-                            } else if (diffDays > 1) {
-                                state.streak = 1;
-                            } else {
-                                // same day, do nothing
-                            }
-                            state.lastStudyDate = new Date();
-                        }
-                    } else {
-                        // First study day
-                        state.studyDays = (state.studyDays || 0) + 1;
-                        state.streak = 1;
-                        state.lastStudyDate = new Date();
-                    }
-                }
-                saveState();
-                renderCountdown();
-            }
-
-            function addStudyHour() {
-                // Add 1 hour to all checked subjects
-                let added = false;
-                for (const [key, val] of Object.entries(state.subjectChecked)) {
-                    if (val) {
-                        state.subjectHours[key] = (state.subjectHours[key] || 0) + 1;
-                        state.totalHours = (state.totalHours || 0) + 1;
-                        state.todayHours = (state.todayHours || 0) + 1;
-                        added = true;
-                    }
-                }
-                if (!added) {
-                    showToast('⚠️ まず科目をチェックしてください');
-                    return;
-                }
-                saveState();
-                renderCountdown();
-                showToast('⏱️ +1時間 学習時間を追加しました');
-            }
-
-            function resetStudyHours() {
-                if (!confirm('今日の学習時間とチェックをリセットしますか？')) return;
-                for (const key of Object.keys(state.subjectHours)) {
-                    state.subjectHours[key] = 0;
-                }
-                state.todayHours = 0;
-                state.todaySubjects = 0;
-                for (const key of Object.keys(state.subjectChecked)) {
-                    state.subjectChecked[key] = false;
-                }
-                // Reset checkboxes UI
-                document.querySelectorAll('input[data-subject]').forEach(cb => cb.checked = false);
-                saveState();
-                renderCountdown();
-                showToast('🔄 リセットしました');
-            }
-
-            // ============================================================
-            // 10. QUOTE ROTATOR
-            // ============================================================
-            function showRandomQuote() {
-                let idx = Math.floor(Math.random() * QUOTES.length);
-                if (idx === currentQuoteIndex && QUOTES.length > 1) {
-                    idx = (idx + 1) % QUOTES.length;
-                }
-                currentQuoteIndex = idx;
-                const q = QUOTES[idx];
-                dom.quoteText.textContent = q.text;
-                dom.quoteAuthor.textContent = q.author;
-                // Subtle animation
-                dom.quoteText.style.transition = 'opacity 0.3s';
-                dom.quoteText.style.opacity = '0';
-                dom.quoteAuthor.style.transition = 'opacity 0.3s';
-                dom.quoteAuthor.style.opacity = '0';
-                setTimeout(() => {
-                    dom.quoteText.textContent = q.text;
-                    dom.quoteAuthor.textContent = q.author;
-                    dom.quoteText.style.opacity = '1';
-                    dom.quoteAuthor.style.opacity = '1';
-                }, 200);
-            }
-
-            // ============================================================
-            // 11. TOAST
-            // ============================================================
-            let toastTimeout = null;
-
-            function showToast(message) {
-                const el = dom.toast;
-                el.textContent = message;
-                el.classList.add('show');
-                clearTimeout(toastTimeout);
-                toastTimeout = setTimeout(() => {
-                    el.classList.remove('show');
-                }, 2800);
-            }
-
-            // ============================================================
-            // 12. PAGE NAVIGATION
-            // ============================================================
-            function navigateTo(pageId) {
-                // Update nav
-                dom.navAnchors.forEach(a => {
-                    a.classList.toggle('active', a.dataset.page === pageId);
-                });
-
-                // Update pages
-                dom.pages.forEach(p => {
-                    p.classList.remove('active', 'page-exit');
-                    if (p.id === `page-${pageId}`) {
-                        p.classList.add('active');
-                    } else {
-                        p.classList.add('page-exit');
-                        setTimeout(() => {
-                            p.classList.remove('page-exit');
-                        }, 300);
-                    }
-                });
-
-                // Close mobile menu
-                dom.navLinks.classList.remove('open');
-                dom.menuToggle.setAttribute('aria-expanded', 'false');
-                dom.menuToggle.textContent = '☰';
-
-                // Scroll to top
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-
-            // ============================================================
-            // 13. INITIALIZATION
-            // ============================================================
-            function init() {
-                // Load state
-                const hasSaved = loadState();
-
-                // If no saved state, set defaults
-                if (!hasSaved) {
-                    state.studyDays = 0;
-                    state.streak = 0;
-                    state.totalHours = 0;
-                    state.todayHours = 0;
-                    state.todaySubjects = 0;
-                    state.subjectHours = { physics: 0, chemistry: 0, biology: 0, botany: 0, zoology: 0 };
-                    state.subjectChecked = { physics: false, chemistry: false, biology: false, botany: false, zoology: false };
-                    state.notes = [];
-                    state.lastStudyDate = null;
-                    saveState();
-                }
-
-                // Render countdown immediately
-                renderCountdown();
-
-                // Set up interval for countdown (update every second)
-                setInterval(renderCountdown, 1000);
-
-                // ---- Event listeners ----
-
-                // Navigation
-                dom.navAnchors.forEach(a => {
-                    a.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        const page = this.dataset.page;
-                        if (page) navigateTo(page);
-                    });
-                });
-
-                // Mobile menu toggle
-                dom.menuToggle.addEventListener('click', function() {
-                    const isOpen = dom.navLinks.classList.toggle('open');
-                    this.setAttribute('aria-expanded', isOpen);
-                    this.textContent = isOpen ? '✕' : '☰';
-                });
-
-                // Subject checkboxes
-                document.querySelectorAll('input[data-subject]').forEach(cb => {
-                    cb.addEventListener('change', function() {
-                        const subject = this.dataset.subject;
-                        toggleSubject(subject, this.checked);
-                    });
-                });
-
-                // Add study hour
-                dom.addHourBtn.addEventListener('click', addStudyHour);
-
-                // Reset study hours
-                dom.resetHoursBtn.addEventListener('click', resetStudyHours);
-
-                // Notes
-                dom.addNoteBtn.addEventListener('click', function() {
-                    const input = dom.noteInput;
-                    if (addNote(input.value)) {
-                        input.value = '';
-                    } else {
-                        showToast('⚠️ メモを入力してください');
-                    }
-                });
-
-                dom.noteInput.addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter') {
-                        dom.addNoteBtn.click();
-                    }
-                });
-
-                // Quote
-                dom.newQuoteBtn.addEventListener('click', showRandomQuote);
-
-                // Initial quote
-                showRandomQuote();
-
-                // Header scroll effect
-                let lastScroll = 0;
-                window.addEventListener('scroll', function() {
-                    const scrollY = window.scrollY;
-                    const header = document.getElementById('siteHeader');
-                    if (scrollY > 20) {
-                        header.classList.add('scrolled');
-                    } else {
-                        header.classList.remove('scrolled');
-                    }
-                    lastScroll = scrollY;
-                });
-
-                // Keyboard shortcut: press 'n' for notes, 'h' for home
-                document.addEventListener('keydown', function(e) {
-                    if (e.ctrlKey || e.metaKey || e.altKey) return;
-                    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-                    const key = e.key.toLowerCase();
-                    if (key === 'h') navigateTo('home');
-                    else if (key === 't') navigateTo('tracker');
-                    else if (key === 'r') navigateTo('resources');
-                    else if (key === 'n') navigateTo('notes');
-                    else if (key === 'm') navigateTo('motivation');
-                });
-
-                // Show welcome toast
-                setTimeout(() => {
-                    showToast('🌸 ようこそ。静かなる努力を始めましょう。');
-                }, 600);
-
-                console.log('🌸 NEET 2027 カウントダウン · 和');
-                console.log('📌 ショートカット: H=ホーム, T=進捗, R=資料, N=覚書, M=励まし');
-            }
-
-            // ============================================================
-            // 14.  START
-            // ============================================================
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', init);
-            } else {
-                init();
-            }
-
-        })();
-    </script>
-
+    })();
+  </script>
 </body>
 </html>

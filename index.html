@@ -3210,4 +3210,868 @@ input[type="range"]::-moz-range-thumb {
       });
 
       this.els.off.addEventListener("input", () => {
-        const v = parseInt(this
+        const v = parseInt(this.els.off.value, 10);
+        this.els.offVal.textContent = v;
+        Store.updateSettings({ offPerWeek: v });
+        Sync.settingsInputs();
+      });
+
+      this.els.start.addEventListener("change", () => {
+        Store.updateSettings({ startDate: this.els.start.value || todayISO() });
+        Sync.settingsInputs();
+      });
+
+      this.els.deadline.addEventListener("change", () => {
+        Store.updateSettings({ deadline: this.els.deadline.value || "" });
+        Sync.settingsInputs();
+      });
+
+      // Generate
+      this.els.generate.addEventListener("click", () => {
+        if (!Store.items.length) {
+          Toast.show("Add at least one backlog item first", "warn");
+          Router.go("setup");
+          return;
+        }
+        Router.go("plan");
+        Toast.show("Plan generated — here's your reality check");
+      });
+
+      // Item list delegation
+      this.els.itemList.addEventListener("click", (e) => {
+        const editBtn = e.target.closest("[data-edit]");
+        const delBtn = e.target.closest("[data-del]");
+        const plusBtn = e.target.closest("[data-plus]");
+        const minusBtn = e.target.closest("[data-minus]");
+
+        if (editBtn) {
+          Setup.startEdit(editBtn.getAttribute("data-edit"));
+          return;
+        }
+
+        if (delBtn) {
+          const id = delBtn.getAttribute("data-del");
+          const it = Store.getItem(id);
+          if (it && confirm('Remove "' + it.topic + '" from your backlog?')) {
+            Store.removeItem(id);
+            this.render();
+            NavBadge.update();
+            Setup.refreshPreview();
+            Toast.show("Item removed", "warn");
+          }
+          return;
+        }
+
+        if (plusBtn) {
+          const id = plusBtn.getAttribute("data-plus");
+          const it = Store.getItem(id);
+          if (!it) return;
+          const done = Store.getDone(id);
+          Store.setDone(id, Math.min(done + 1, it.lectures));
+          this.render();
+          return;
+        }
+
+        if (minusBtn) {
+          const id = minusBtn.getAttribute("data-minus");
+          const done = Store.getDone(id);
+          Store.setDone(id, Math.max(done - 1, 0));
+          this.render();
+          return;
+        }
+      });
+
+      this.render();
+    },
+
+    render() {
+      if (!this.els.itemList) return;
+
+      // Sync settings inputs
+      const s = Store.settings;
+      this.els.hours.value = s.hoursPerDay;
+      this.els.hoursVal.textContent = s.hoursPerDay + "h";
+      this.els.off.value = s.offPerWeek;
+      this.els.offVal.textContent = s.offPerWeek;
+      this.els.start.value = s.startDate || todayISO();
+      this.els.deadline.value = s.deadline || "";
+
+      const items = Store.items;
+
+      if (!items.length) {
+        this.els.itemList.innerHTML =
+          '<div class="empty">' +
+            '<span class="em-icon">📚</span>' +
+            "<h3>No backlog items yet</h3>" +
+            "<p>Add your first pending subject or chapter and we'll start building your realistic plan.</p>" +
+            '<button class="btn btn-primary" data-nav="setup">Add my first item</button>' +
+          "</div>";
+        return;
+      }
+
+      let html = '<div class="item-list">';
+
+      items.forEach((it, index) => {
+        const meta = subjectMeta(it.subject);
+        const effMinutes = Calc.itemEffectiveMinutes(it);
+        const done = Store.getDone(it.id);
+        const pct = it.lectures > 0 ? Math.round((done / it.lectures) * 100) : 0;
+
+        html +=
+          '<div class="item" style="animation-delay:' + Math.min(index * 0.04, 0.4) + 's">' +
+            '<div class="item-avatar ' + meta.cls + '">' + meta.short + "</div>" +
+            '<div class="item-body">' +
+              '<div class="item-title">' + esc(it.topic) + "</div>" +
+              '<div class="item-meta">' +
+                "<span><b>" + it.lectures + "</b> lectures</span>" +
+                "<span>" + it.duration + " min each</span>" +
+                "<span>" + it.speed + "× speed</span>" +
+                "<span>+" + it.revision + "% notes</span>" +
+                "<span><b>" + formatMinutes(effMinutes) + "</b> total</span>" +
+              "</div>" +
+              '<div class="mini-progress"><span style="width:' + pct + '%"></span></div>' +
+              '<div class="item-meta" style="margin-top:6px;">' +
+                "<span>" + done + " / " + it.lectures + " done (" + pct + "%)</span>" +
+              "</div>" +
+            "</div>" +
+            '<div class="item-actions">' +
+              '<button class="icon-mini" data-minus="' + it.id + '" title="One less done">' +
+                '<svg viewBox="0 0 24 24" stroke-linecap="round"><path d="M5 12h14"></path></svg>' +
+              "</button>" +
+              '<button class="icon-mini" data-plus="' + it.id + '" title="One more done">' +
+                '<svg viewBox="0 0 24 24" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>' +
+              "</button>" +
+              '<button class="icon-mini" data-edit="' + it.id + '" title="Edit">' +
+                '<svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">' +
+                  '<path d="M12 20h9"></path>' +
+                  '<path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4z"></path>' +
+                "</svg>" +
+              "</button>" +
+              '<button class="icon-mini del" data-del="' + it.id + '" title="Delete">' +
+                '<svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">' +
+                  '<path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"></path>' +
+                "</svg>" +
+              "</button>" +
+            "</div>" +
+          "</div>";
+      });
+
+      html += "</div>";
+      this.els.itemList.innerHTML = html;
+    }
+  };
+
+  /* ------------------------------------------------------------------------
+     10. CALCULATION ENGINE
+     ------------------------------------------------------------------------ */
+
+  const Calc = {
+    /**
+     * Effective minutes for a single item (remaining lectures only).
+     * effective = (remaining × duration ÷ speed) × (1 + revision/100)
+     */
+    itemEffectiveMinutes(item) {
+      const done = Store.getDone(item.id);
+      const remaining = Math.max(item.lectures - done, 0);
+      if (remaining === 0) return 0;
+      const raw = (remaining * item.duration) / item.speed;
+      return raw * (1 + item.revision / 100);
+    },
+
+    /** Effective minutes for a single lecture of an item */
+    lectureMinutes(item) {
+      const raw = item.duration / item.speed;
+      return raw * (1 + item.revision / 100);
+    },
+
+    /** Full calculation of the whole backlog */
+    compute() {
+      const items = Store.items;
+      const settings = Store.settings;
+
+      const hoursPerDay = clamp(parseFloat(settings.hoursPerDay) || 6, 0.5, 24);
+      const offPerWeek = clamp(parseInt(settings.offPerWeek, 10) || 0, 0, 3);
+      const capacity = hoursPerDay * 60; // minutes per study day
+
+      let totalMinutes = 0;
+      let totalLectures = 0;
+      let doneLectures = 0;
+      const perSubject = {};
+
+      items.forEach((it) => {
+        const done = Store.getDone(it.id);
+        const remaining = Math.max(it.lectures - done, 0);
+        const mins = this.itemEffectiveMinutes(it);
+
+        totalMinutes += mins;
+        totalLectures += it.lectures;
+        doneLectures += Math.min(done, it.lectures);
+
+        if (!perSubject[it.subject]) {
+          perSubject[it.subject] = { minutes: 0, lectures: 0, done: 0, name: it.subject };
+        }
+        perSubject[it.subject].minutes += mins;
+        perSubject[it.subject].lectures += it.lectures;
+        perSubject[it.subject].done += Math.min(done, it.lectures);
+      });
+
+      const totalHours = totalMinutes / 60;
+
+      // Study days required
+      const studyDays = totalMinutes > 0 ? Math.ceil(totalMinutes / capacity) : 0;
+
+      // Convert study days into calendar days (accounting for rest days)
+      let calendarDays = 0;
+      if (studyDays > 0) {
+        if (offPerWeek <= 0) {
+          calendarDays = studyDays;
+        } else {
+          const workPerWeek = 7 - offPerWeek;
+          const fullWeeks = Math.floor(studyDays / workPerWeek);
+          const rem = studyDays % workPerWeek;
+          calendarDays = fullWeeks * 7 + (rem > 0 ? rem + offPerWeek : 0);
+        }
+      }
+
+      const startDate = parseISO(settings.startDate) || new Date();
+      const finishDate = addDays(startDate, Math.max(calendarDays - 1, 0));
+
+      // Deadline analysis
+      let deadlineInfo = null;
+      const dl = parseISO(settings.deadline);
+      if (dl) {
+        const availableCalendarDays = Math.max(daysBetween(startDate, dl) + 1, 0);
+        // How many of those are study days?
+        let availableStudyDays = 0;
+        if (offPerWeek <= 0) {
+          availableStudyDays = availableCalendarDays;
+        } else {
+          const workPerWeek = 7 - offPerWeek;
+          const fullWeeks = Math.floor(availableCalendarDays / 7);
+          const rem = availableCalendarDays % 7;
+          availableStudyDays = fullWeeks * workPerWeek + Math.min(rem, workPerWeek);
+        }
+
+        const requiredPerDay = availableStudyDays > 0 ? totalMinutes / availableStudyDays / 60 : Infinity;
+        const feasible = totalMinutes === 0 || (availableStudyDays > 0 && requiredPerDay <= hoursPerDay + 0.001);
+
+        deadlineInfo = {
+          date: dl,
+          availableCalendarDays,
+          availableStudyDays,
+          requiredPerDay: isFinite(requiredPerDay) ? requiredPerDay : null,
+          feasible,
+          gapHoursPerDay: isFinite(requiredPerDay) ? requiredPerDay - hoursPerDay : null,
+          isPast: daysBetween(new Date(), dl) < 0 && daysBetween(startDate, dl) < 0
+        };
+      }
+
+      return {
+        items,
+        settings,
+        hoursPerDay,
+        offPerWeek,
+        capacity,
+        totalMinutes,
+        totalHours,
+        totalLectures,
+        doneLectures,
+        remainingLectures: Math.max(totalLectures - doneLectures, 0),
+        studyDays,
+        calendarDays,
+        startDate,
+        finishDate,
+        perSubject,
+        deadlineInfo,
+        progressPct: totalLectures > 0 ? (doneLectures / totalLectures) * 100 : 0
+      };
+    },
+
+    /** Is a given weekday an off day for the chosen offPerWeek count? */
+    isOffDay(dow, offPerWeek) {
+      if (offPerWeek <= 0) return false;
+      if (offPerWeek === 1) return dow === 0;             // Sunday
+      if (offPerWeek === 2) return dow === 0 || dow === 6; // Sun + Sat
+      return dow === 0 || dow === 6 || dow === 5;         // Sun + Sat + Fri
+    },
+
+    /**
+     * Build a day-by-day schedule.
+     * Returns an array of day objects:
+     * { index, date, isOff, totalMinutes, items: [{subject, topic, minutes, partial}] }
+     */
+    buildSchedule(result, maxDays) {
+      const limit = maxDays || 400;
+
+      // Flatten all remaining lectures into a queue
+      const queue = [];
+      result.items.forEach((it) => {
+        const done = Store.getDone(it.id);
+        const remaining = Math.max(it.lectures - done, 0);
+        const perLecture = this.lectureMinutes(it);
+        for (let i = 0; i < remaining; i++) {
+          queue.push({
+            subject: it.subject,
+            topic: it.topic,
+            minutes: perLecture
+          });
+        }
+      });
+
+      if (!queue.length) return [];
+
+      const days = [];
+      let cursor = 0;
+      let date = new Date(result.startDate.getTime());
+      let guard = 0;
+
+      while (cursor < queue.length && guard < limit) {
+        guard++;
+
+        if (this.isOffDay(date.getDay(), result.offPerWeek)) {
+          days.push({
+            index: days.length + 1,
+            date: new Date(date.getTime()),
+            isOff: true,
+            totalMinutes: 0,
+            items: []
+          });
+          date = addDays(date, 1);
+          continue;
+        }
+
+        let remainingCapacity = result.capacity;
+        const items = [];
+
+        while (cursor < queue.length && remainingCapacity > 0.5) {
+          const lecture = queue[cursor];
+
+          if (lecture.minutes <= remainingCapacity + 0.5) {
+            items.push({
+              subject: lecture.subject,
+              topic: lecture.topic,
+              minutes: lecture.minutes,
+              partial: false
+            });
+            remainingCapacity -= lecture.minutes;
+            cursor++;
+          } else {
+            // Split the lecture across today and tomorrow
+            items.push({
+              subject: lecture.subject,
+              topic: lecture.topic,
+              minutes: remainingCapacity,
+              partial: true
+            });
+            queue[cursor] = {
+              subject: lecture.subject,
+              topic: lecture.topic,
+              minutes: lecture.minutes - remainingCapacity
+            };
+            remainingCapacity = 0;
+          }
+        }
+
+        days.push({
+          index: days.length + 1,
+          date: new Date(date.getTime()),
+          isOff: false,
+          totalMinutes: result.capacity - remainingCapacity,
+          items
+        });
+
+        date = addDays(date, 1);
+      }
+
+      return days;
+    }
+  };
+
+  /* ------------------------------------------------------------------------
+     11. PLAN PAGE RENDERING
+     ------------------------------------------------------------------------ */
+
+  const Plan = {
+    els: {},
+    lastSignature: "",
+
+    init() {
+      this.els = {
+        banner: $("#planBanner"),
+        stats: $("#planStats"),
+        ringFill: $("#ringFill"),
+        ringPct: $("#ringPct"),
+        ringCaption: $("#ringCaption"),
+        barList: $("#barList"),
+        schedule: $("#schedule"),
+        subtitle: $("#planSubtitle"),
+        printBtn: $("#printBtn"),
+        resetProgress: $("#resetProgress"),
+        hours2: $("#hoursPerDay2"),
+        hoursVal2: $("#hoursVal2"),
+        off2: $("#offPerWeek2"),
+        offVal2: $("#offVal2"),
+        deadline2: $("#deadline2")
+      };
+
+      // Secondary settings controls on plan page
+      this.els.hours2.addEventListener("input", () => {
+        const v = parseFloat(this.els.hours2.value);
+        this.els.hoursVal2.textContent = v + "h";
+        Store.updateSettings({ hoursPerDay: v });
+        Sync.settingsInputs();
+        this.render();
+      });
+
+      this.els.off2.addEventListener("input", () => {
+        const v = parseInt(this.els.off2.value, 10);
+        this.els.offVal2.textContent = v;
+        Store.updateSettings({ offPerWeek: v });
+        Sync.settingsInputs();
+        this.render();
+      });
+
+      this.els.deadline2.addEventListener("change", () => {
+        Store.updateSettings({ deadline: this.els.deadline2.value || "" });
+        Sync.settingsInputs();
+        this.render();
+      });
+
+      this.els.printBtn.addEventListener("click", () => window.print());
+
+      this.els.resetProgress.addEventListener("click", () => {
+        Store.state.progress = {};
+        Store.save();
+        this.render();
+        Backlog.render();
+        Toast.show("Progress ticks reset", "warn");
+      });
+
+      // Day checkboxes
+      this.els.schedule.addEventListener("click", (e) => {
+        const check = e.target.closest(".day-check");
+        if (!check) return;
+        const dayIndex = check.getAttribute("data-day");
+        const dayEl = check.closest(".day");
+        const key = "day_" + dayIndex;
+        const current = Store.state.progress[key] === true;
+        Store.state.progress[key] = !current;
+        Store.save();
+        dayEl.classList.toggle("done", !current);
+      });
+
+      this.render();
+    },
+
+    render() {
+      if (!this.els.stats) return;
+
+      const result = Calc.compute();
+
+      // Sync the secondary controls
+      this.els.hours2.value = result.hoursPerDay;
+      this.els.hoursVal2.textContent = result.hoursPerDay + "h";
+      this.els.off2.value = result.offPerWeek;
+      this.els.offVal2.textContent = result.offPerWeek;
+      this.els.deadline2.value = Store.settings.deadline || "";
+
+      // ---- Empty state ----
+      if (!result.items.length) {
+        this.els.subtitle.textContent = "Add some backlog items to see your plan.";
+        this.els.banner.innerHTML = "";
+        this.els.stats.innerHTML =
+          '<div class="stat-card">' +
+            '<div class="s-label">No data yet</div>' +
+            '<div class="s-value">0h</div>' +
+            '<div class="s-sub">Add backlog items to begin</div>' +
+          "</div>";
+        this.els.barList.innerHTML =
+          '<p class="small muted">No subjects to show yet.</p>';
+        this.els.schedule.innerHTML =
+          '<div class="empty">' +
+            '<span class="em-icon">🗓️</span>' +
+            "<h3>Your schedule will appear here</h3>" +
+            "<p>Add your pending lectures and set your daily study hours — we'll build the day-by-day plan.</p>" +
+            '<button class="btn btn-primary" data-nav="setup">Add backlog items</button>' +
+          "</div>";
+        this.updateRing(0, 0, 0);
+        return;
+      }
+
+      // ---- Subtitle ----
+      this.els.subtitle.textContent =
+        result.remainingLectures + " lectures left · " +
+        formatHours(result.totalHours) + " of real work · " +
+        result.calendarDays + " calendar days at " + result.hoursPerDay + "h/day.";
+
+      // ---- Banner ----
+      this.renderBanner(result);
+
+      // ---- Stat cards ----
+      this.renderStats(result);
+
+      // ---- Ring ----
+      this.updateRing(result.progressPct, result.doneLectures, result.totalLectures);
+
+      // ---- Subject bars ----
+      this.renderBars(result);
+
+      // ---- Schedule ----
+      this.renderSchedule(result);
+    },
+
+    renderBanner(result) {
+      const d = result.deadlineInfo;
+
+      if (result.remainingLectures === 0 && result.totalLectures > 0) {
+        this.els.banner.innerHTML =
+          '<div class="banner ok">' +
+            '<div class="b-icon">🎉</div>' +
+            "<div><h4>Backlog cleared!</h4>" +
+            "<p>You've marked every lecture as done. Time for full-length revision and mock tests.</p></div>" +
+          "</div>";
+        return;
+      }
+
+      if (!d) {
+        this.els.banner.innerHTML =
+          '<div class="banner ok">' +
+            '<div class="b-icon">💡</div>' +
+            "<div><h4>No deadline set</h4>" +
+            "<p>Your plan finishes on <b>" + longDate(result.finishDate) + "</b>. " +
+            "Add a target date on the Backlog page to see whether your timeline is realistic.</p></div>" +
+          "</div>";
+        return;
+      }
+
+      if (d.feasible) {
+        this.els.banner.innerHTML =
+          '<div class="banner ok">' +
+            '<div class="b-icon">✅</div>' +
+            "<div><h4>Your deadline is achievable</h4>" +
+            "<p>To finish by <b>" + longDate(d.date) + "</b>, you need about <b>" +
+            (d.requiredPerDay !== null ? d.requiredPerDay.toFixed(1) : "—") +
+            " hours/day</b> across your " + d.availableStudyDays + " available study days. " +
+            "That fits inside your " + result.hoursPerDay + "h/day capacity.</p></div>" +
+          "</div>";
+        return;
+      }
+
+      // Not feasible
+      const needed = d.requiredPerDay !== null ? d.requiredPerDay.toFixed(1) : "—";
+      const extra = d.gapHoursPerDay !== null ? d.gapHoursPerDay.toFixed(1) : "—";
+
+      this.els.banner.innerHTML =
+        '<div class="banner danger">' +
+          '<div class="b-icon">⚠️</div>' +
+          "<div><h4>This deadline needs more hours than you have</h4>" +
+          "<p>To finish by <b>" + longDate(d.date) + "</b> you'd need <b>" + needed +
+          " hours/day</b>, which is <b>" + extra + " hours more</b> than your current " +
+          result.hoursPerDay + "h/day capacity. Either extend the deadline, increase daily hours, " +
+          "or drop/shorten some topics.</p></div>" +
+        "</div>";
+    },
+
+    renderStats(result) {
+      const dailyLectures = result.hoursPerDay > 0 && result.totalLectures > 0
+        ? (result.remainingLectures / Math.max(result.studyDays, 1))
+        : 0;
+
+      const cards = [
+        {
+          label: "Total real work",
+          value: formatHours(result.totalHours),
+          sub: "including notes & revision",
+          cls: "accent"
+        },
+        {
+          label: "Lectures remaining",
+          value: result.remainingLectures,
+          sub: result.doneLectures + " of " + result.totalLectures + " already done",
+          cls: ""
+        },
+        {
+          label: "Days needed",
+          value: result.calendarDays,
+          sub: result.studyDays + " study days · " + result.offPerWeek + " rest day(s)/week",
+          cls: "violet"
+        },
+        {
+          label: "Realistic finish date",
+          value: "",
+          html: longDate(result.finishDate),
+          sub: "starting " + longDate(result.startDate),
+          cls: ""
+        },
+        {
+          label: "Daily target",
+          value: result.hoursPerDay + "h",
+          sub: "≈ " + dailyLectures.toFixed(1) + " lectures per day",
+          cls: ""
+        }
+      ];
+
+      this.els.stats.innerHTML = cards.map((c) =>
+        '<div class="stat-card">' +
+          '<div class="s-label">' + esc(c.label) + "</div>" +
+          '<div class="s-value ' + c.cls + '">' + (c.html || esc(String(c.value))) + "</div>" +
+          '<div class="s-sub">' + esc(c.sub) + "</div>" +
+        "</div>"
+      ).join("");
+    },
+
+    updateRing(pct, done, total) {
+      const radius = 52;
+      const circumference = 2 * Math.PI * radius; // ≈ 326.7
+      const safePct = clamp(pct, 0, 100);
+      const offset = circumference - (safePct / 100) * circumference;
+
+      this.els.ringFill.style.strokeDasharray = circumference.toFixed(2);
+      this.els.ringFill.style.strokeDashoffset = offset.toFixed(2);
+
+      // Animated number
+      const startVal = parseInt(this.els.ringPct.textContent, 10) || 0;
+      const endVal = Math.round(safePct);
+      const duration = 900;
+      const t0 = performance.now();
+
+      const step = (now) => {
+        const t = clamp((now - t0) / duration, 0, 1);
+        const eased = 1 - Math.pow(1 - t, 3);
+        const val = Math.round(startVal + (endVal - startVal) * eased);
+        this.els.ringPct.textContent = val + "%";
+        if (t < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+
+      this.els.ringCaption.textContent =
+        done + " of " + total + " lectures marked done";
+    },
+
+    renderBars(result) {
+      const subjects = Object.values(result.perSubject)
+        .filter((s) => s.minutes > 0)
+        .sort((a, b) => b.minutes - a.minutes);
+
+      if (!subjects.length) {
+        this.els.barList.innerHTML =
+          '<p class="small muted">All lectures are marked done. Nothing left to plot. 🎉</p>';
+        return;
+      }
+
+      const max = Math.max.apply(null, subjects.map((s) => s.minutes));
+
+      this.els.barList.innerHTML = subjects.map((s) => {
+        const meta = subjectMeta(s.name);
+        const pct = max > 0 ? (s.minutes / max) * 100 : 0;
+        const share = result.totalMinutes > 0 ? (s.minutes / result.totalMinutes) * 100 : 0;
+
+        return (
+          '<div class="bar-item">' +
+            '<div class="bar-top">' +
+              '<span class="bar-name">' +
+                '<span class="swatch" style="background:' + meta.color + '"></span>' +
+                esc(s.name) +
+              "</span>" +
+              '<span class="bar-val">' + formatMinutes(s.minutes) +
+                " · " + share.toFixed(0) + "%</span>" +
+            "</div>" +
+            '<div class="bar-track">' +
+              '<div class="bar-fill" data-width="' + pct.toFixed(1) + '" ' +
+                'style="background:linear-gradient(90deg,' + meta.color + "," + meta.color + '99)"></div>' +
+            "</div>" +
+          "</div>"
+        );
+      }).join("");
+
+      // Animate bars in on next frame
+      requestAnimationFrame(() => {
+        $$(".bar-fill", this.els.barList).forEach((el) => {
+          el.style.width = el.getAttribute("data-width") + "%";
+        });
+      });
+    },
+
+    renderSchedule(result) {
+      const days = Calc.buildSchedule(result, 400);
+
+      if (!days.length) {
+        this.els.schedule.innerHTML =
+          '<div class="empty">' +
+            '<span class="em-icon">🎉</span>' +
+            "<h3>Nothing scheduled</h3>" +
+            "<p>Every lecture in your backlog is marked as done. Amazing work.</p>" +
+          "</div>";
+        return;
+      }
+
+      const html = days.map((day, i) => {
+        if (day.isOff) {
+          return (
+            '<div class="day is-off" style="animation-delay:' + Math.min(i * 0.012, 0.4) + 's">' +
+              '<div class="day-marker">' +
+                '<div class="day-num">—</div>' +
+                '<div class="day-date">' + prettyDate(day.date).split(",")[0] + "</div>" +
+              "</div>" +
+              '<div class="day-content">' +
+                '<div class="item-title" style="color:var(--muted);font-size:0.88rem;">Rest day</div>' +
+                '<div class="item-meta"><span>Recover, revise lightly, sleep well</span></div>' +
+              "</div>" +
+              '<div class="day-time" style="color:var(--faint)">0h</div>' +
+              "<div></div>" +
+            "</div>"
+          );
+        }
+
+        // Group this day's items by subject
+        const groups = {};
+        day.items.forEach((it) => {
+          if (!groups[it.subject]) {
+            groups[it.subject] = { subject: it.subject, minutes: 0, count: 0 };
+          }
+          groups[it.subject].minutes += it.minutes;
+          groups[it.subject].count += it.partial ? 0.5 : 1;
+        });
+
+        const tags = Object.values(groups).map((g) => {
+          const meta = subjectMeta(g.subject);
+          const countText = g.count % 1 === 0 ? g.count : g.count.toFixed(1);
+          return (
+            '<span class="subj-tag">' +
+              '<span class="swatch" style="background:' + meta.color + '"></span>' +
+              esc(g.subject) + " · " + countText + " lec" +
+            "</span>"
+          );
+        }).join("");
+
+        const doneKey = Store.state.progress["day_" + day.index] === true;
+        const topics = day.items
+          .map((it) => it.topic)
+          .filter((v, idx, arr) => arr.indexOf(v) === idx)
+          .slice(0, 3)
+          .join(" · ");
+
+        return (
+          '<div class="day' + (doneKey ? " done" : "") + '" style="animation-delay:' +
+            Math.min(i * 0.012, 0.4) + 's">' +
+            '<div class="day-marker">' +
+              '<div class="day-num">' + day.index + "</div>" +
+              '<div class="day-date">' + prettyDate(day.date) + "</div>" +
+            "</div>" +
+            '<div class="day-content">' +
+              '<div class="item-title" style="font-size:0.9rem;">' +
+                (topics ? esc(topics) : "Study session") +
+                (day.items.length > 3 ? " +" + (day.items.length - 3) + " more" : "") +
+              "</div>" +
+              '<div class="day-subjects">' + tags + "</div>" +
+            "</div>" +
+            '<div class="day-time">' + formatMinutes(day.totalMinutes) + "</div>" +
+            '<button class="day-check" data-day="' + day.index + '" title="Mark day done">' +
+              '<svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">' +
+                '<path d="M20 6L9 17l-5-5"></path>' +
+              "</svg>" +
+            "</button>" +
+          "</div>"
+        );
+      }).join("");
+
+      this.els.schedule.innerHTML = html;
+    }
+  };
+
+  /* ------------------------------------------------------------------------
+     SYNC — keep duplicate controls in sync
+     ------------------------------------------------------------------------ */
+
+  const Sync = {
+    settingsInputs() {
+      const s = Store.settings;
+
+      const h1 = $("#hoursPerDay");
+      const h2 = $("#hoursPerDay2");
+      const hv1 = $("#hoursVal");
+      const hv2 = $("#hoursVal2");
+
+      if (h1) h1.value = s.hoursPerDay;
+      if (h2) h2.value = s.hoursPerDay;
+      if (hv1) hv1.textContent = s.hoursPerDay + "h";
+      if (hv2) hv2.textContent = s.hoursPerDay + "h";
+
+      const o1 = $("#offPerWeek");
+      const o2 = $("#offPerWeek2");
+      const ov1 = $("#offVal");
+      const ov2 = $("#offVal2");
+
+      if (o1) o1.value = s.offPerWeek;
+      if (o2) o2.value = s.offPerWeek;
+      if (ov1) ov1.textContent = s.offPerWeek;
+      if (ov2) ov2.textContent = s.offPerWeek;
+
+      const d1 = $("#deadline");
+      const d2 = $("#deadline2");
+      if (d1) d1.value = s.deadline || "";
+      if (d2) d2.value = s.deadline || "";
+
+      const sd = $("#startDate");
+      if (sd) sd.value = s.startDate || todayISO();
+    }
+  };
+
+  /* ------------------------------------------------------------------------
+     12. INIT
+     ------------------------------------------------------------------------ */
+
+  function init() {
+    Store.load();
+
+    // Footer year
+    const yearEl = $("#year");
+    if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+    Theme.init();
+    Toast.init();
+    Effects.init();
+    HomeFX.init();
+    Setup.init();
+    Backlog.init();
+    Plan.init();
+    NavBadge.update();
+    Sync.settingsInputs();
+
+    // Theme toggle
+    const themeBtn = $("#themeBtn");
+    if (themeBtn) themeBtn.addEventListener("click", () => Theme.toggle());
+
+    // Router (last, so all views have their initial state ready)
+    Router.init();
+
+    // Re-render on storage change from another tab
+    window.addEventListener("storage", (e) => {
+      if (e.key === STORAGE_KEY) {
+        Store.load();
+        NavBadge.update();
+        Backlog.render();
+        Plan.render();
+        Setup.refreshPreview();
+      }
+    });
+
+    // Prevent accidental data loss on empty backlog when hitting plan
+    if (Store.items.length > 0) {
+      Toast.show("Welcome back — " + Store.items.length + " backlog item(s) loaded");
+    } else {
+      Toast.show("Welcome! Let's break that backlog.");
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+
+})();
+</script>
+
+</body>
+</html>
